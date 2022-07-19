@@ -1,0 +1,21 @@
+{
+  "name": "mipago_kinal_nodejs",
+  "version": "1.0.0",
+  "description": "Web Kinal Program from Hurtarte Garcia, Solis Martinez and Brandon Palma",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "KJP",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
+    "jwt-simple": "^0.5.6",
+    "moment": "^2.29.1",
+    "mongoose": "^6.2.1",
+    "nodemon": "^2.0.15"
+  }
+}
