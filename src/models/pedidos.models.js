@@ -5,7 +5,9 @@ const PedidosSchema = Schema({
     producto:String,
     cantidad:String,
     subTotal:Number,
-    alumno:Number,
+    alumno:String,
+    carnet:String,
+    tipo:String,
     idAlumno:{type: Schema.Types.ObjectId, ref: 'usuarios'},
     idProducto:{type: Schema.Types.ObjectId, ref: 'productos'},
 });

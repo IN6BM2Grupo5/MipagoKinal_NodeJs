@@ -6,7 +6,8 @@ const ProductosSchema = Schema({
     descripcion:String,
     precio:Number,
     stock:Number,
-    estado:String
+    estado:String,
+    tipo:String
 });
 
 module.exports = mongoose.model('productos', ProductosSchema);

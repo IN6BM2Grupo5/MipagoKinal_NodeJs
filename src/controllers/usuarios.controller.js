@@ -12,6 +12,7 @@ function AdminApp() {
                 bcrypt.hash("MipagoKinal", null, null, (err, passwordEncriptada) => {
                     Usuario.create({
                         usuario: "MipagoKinalAdmin",
+                        correo:'mipagokinaladmin@gmail.com',
                         password: passwordEncriptada,
                         rol: "Admin_APP",
                     });
@@ -24,55 +25,29 @@ function AdminApp() {
 //Login
 function Login(req, res) {
     var parametros = req.body;
-    if(parametros.correo = 'MipagoKinalAdmin'){
-        Usuario.findOne({ usuario: parametros.correo}, (err, usuarioEncontrado) => {
-            if (err) return res.status(500).send({ mensaje: "Error en la peticion" });
-            if (usuarioEncontrado) {
-                bcrypt.compare(
-                    parametros.password,
-                    usuarioEncontrado.password,
-                    (err, verificacionPassword) => {
-                        if (verificacionPassword) {
-                            if (parametros.obtenerToken === "true") {
-                                return res.status(200).send({ token: jwt.crearToken(usuarioEncontrado) });
-                            } else {
-                                usuarioEncontrado.password = undefined;
-                                return res.status(200).send({ usuario: usuarioEncontrado });
-                            }
+    Usuario.findOne({ correo: parametros.correo }, (err, usuarioEncontrado) => {
+        if (err) return res.status(500).send({ mensaje: "Error en la peticion" });
+        if (usuarioEncontrado) {
+            bcrypt.compare(
+                parametros.password,
+                usuarioEncontrado.password,
+                (err, verificacionPassword) => {
+                    if (verificacionPassword) {
+                        if (parametros.obtenerToken === "true") {
+                            return res.status(200).send({ token: jwt.crearToken(usuarioEncontrado) });
                         } else {
-                            return res.status(500).send({ mensaje: "Las contraseñas no coinciden" });
+                            usuarioEncontrado.password = undefined;
+                            return res.status(200).send({ usuario: usuarioEncontrado });
                         }
+                    } else {
+                        return res.status(500).send({ mensaje: "Las contraseñas no coinciden" });
                     }
-                );
-            } else {
-                return res.status(500).send({ mensaje: "Error, el usuario no se encuentra registrado." });
-            }
-        });
-    }else{
-        Usuario.findOne({ correo: parametros.correo }, (err, usuarioEncontrado) => {
-            if (err) return res.status(500).send({ mensaje: "Error en la peticion" });
-            if (usuarioEncontrado) {
-                bcrypt.compare(
-                    parametros.password,
-                    usuarioEncontrado.password,
-                    (err, verificacionPassword) => {
-                        if (verificacionPassword) {
-                            if (parametros.obtenerToken === "true") {
-                                return res.status(200).send({ token: jwt.crearToken(usuarioEncontrado) });
-                            } else {
-                                usuarioEncontrado.password = undefined;
-                                return res.status(200).send({ usuario: usuarioEncontrado });
-                            }
-                        } else {
-                            return res.status(500).send({ mensaje: "Las contraseñas no coinciden" });
-                        }
-                    }
-                );
-            } else {
-                return res.status(500).send({ mensaje: "Error, el correo no se encuentra registrado." });
-            }
-        });
-    }
+                }
+            );
+        } else {
+            return res.status(500).send({ mensaje: "Error, el correo no se encuentra registrado." });
+        }
+    });
 }
 
 //Agregar
@@ -274,118 +249,118 @@ function ingresarFondos(req, res) {
 }
 
 //Eliminar
-function eliminarUsuario(req,res){
+function eliminarUsuario(req, res) {
     var idUsuario = req.params.idUsuario;
-    if(req.user.rol == 'Admin_APP'){
-        Usuario.findbyIdAndDelete(idUsuario,(err,usuarioEliminado)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!usuarioEliminado) return res.status(500).send({mensaje:'Error al eliminar el usuario'});
-            return res.status(200).send({usuario:usuarioEliminado});
+    if (req.user.rol == 'Admin_APP') {
+        Usuario.findbyIdAndDelete(idUsuario, (err, usuarioEliminado) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!usuarioEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
+            return res.status(200).send({ usuario: usuarioEliminado });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado para eliminar un usuario'});
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado para eliminar un usuario' });
     }
 }
 
 //Usuarios
-function alumnos(req,res){
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({rol:'Alumno'},(err,alumnosEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!alumnosEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'});
+function alumnos(req, res) {
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ rol: 'Alumno' }, (err, alumnosEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!alumnosEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
 
-            return res.status(200).send({usuarios: alumnosEncontrados});
+            return res.status(200).send({ usuarios: alumnosEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'});
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' });
     }
 }
 
-function administradoresSecretaria(req,res){
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({rol:'Admin_Secretaria'},(err,adminsEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!adminsEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'});
+function administradoresSecretaria(req, res) {
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ rol: 'Admin_Secretaria' }, (err, adminsEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
 
-            return res.status(200).send({usuarios: adminsEncontrados});
+            return res.status(200).send({ usuarios: adminsEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'});
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' });
     }
 }
 
-function administradoresCafeteria(req,res){
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({rol:'Admin_Cafeteria'},(err,adminsEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!adminsEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'});
+function administradoresCafeteria(req, res) {
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ rol: 'Admin_Cafeteria' }, (err, adminsEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
 
-            return res.status(200).send({usuarios: adminsEncontrados});
+            return res.status(200).send({ usuarios: adminsEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'});
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' });
     }
 }
 
 //Busquedas
-function usuarioId(req,res){
+function usuarioId(req, res) {
     var idUsuario = req.params.idUsuario;
-    Usuario.findById(idUsuario,(err,usuarioEncontrado)=>{
-        if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-        if(!usuarioEncontrado) return res.status(500).send({mensaje:'Error al encontrar usuarios'});
-        return res.status(200).send({usuario:usuarioEncontrado});
+    Usuario.findById(idUsuario, (err, usuarioEncontrado) => {
+        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+        if (!usuarioEncontrado) return res.status(500).send({ mensaje: 'Error al encontrar usuarios' });
+        return res.status(200).send({ usuario: usuarioEncontrado });
     })
 }
 
-function alumnosPorNombres(req,res){
+function alumnosPorNombres(req, res) {
     var nombre = req.params.nombre;
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({nombres:{$regex: nombre,$options:'i'},rol:'Alumno'},(err,usuariosEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!usuariosEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'})
-            return res.status(200).send({usuarios:usuariosEncontrados});
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ nombres: { $regex: nombre, $options: 'i' }, rol: 'Alumno' }, (err, usuariosEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!usuariosEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' })
+            return res.status(200).send({ usuarios: usuariosEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'})
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' })
     }
 }
 
-function alumnosPorApellidos(req,res){
+function alumnosPorApellidos(req, res) {
     var apellido = req.params.apellido;
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({apellidos:{$regex: apellido,$options:'i'},rol:'Alumno'},(err,usuariosEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!usuariosEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'})
-            return res.status(200).send({usuarios:usuariosEncontrados});
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ apellidos: { $regex: apellido, $options: 'i' }, rol: 'Alumno' }, (err, usuariosEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!usuariosEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' })
+            return res.status(200).send({ usuarios: usuariosEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'})
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' })
     }
 }
 
-function alumnosPorCarnet(req,res){
+function alumnosPorCarnet(req, res) {
     var carnet = req.params.carnet;
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({carnet:{$regex: carnet,$options:'i'},rol:'Alumno'},(err,usuariosEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!usuariosEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'})
-            return res.status(200).send({usuarios:usuariosEncontrados});
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ carnet: { $regex: carnet, $options: 'i' }, rol: 'Alumno' }, (err, usuariosEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!usuariosEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' })
+            return res.status(200).send({ usuarios: usuariosEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'})
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' })
     }
 }
 
-function alumnosPorCorreo(req,res){
+function alumnosPorCorreo(req, res) {
     var correo = req.params.correo;
-    if(req.user.rol != 'Alumno'){
-        Usuario.find({correo:{$regex: correo,$options:'i'},rol:'Alumno'},(err,usuariosEncontrados)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!usuariosEncontrados) return res.status(500).send({mensaje:'No se encontraron alumnos'})
-            return res.status(200).send({usuarios:usuariosEncontrados});
+    if (req.user.rol != 'Alumno') {
+        Usuario.find({ correo: { $regex: correo, $options: 'i' }, rol: 'Alumno' }, (err, usuariosEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!usuariosEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' })
+            return res.status(200).send({ usuarios: usuariosEncontrados });
         })
-    }else{
-        return res.status(500).send({mensaje:'No esta autorizado'})
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' })
     }
 }
 
