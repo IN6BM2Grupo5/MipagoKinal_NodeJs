@@ -50,6 +50,7 @@ function agregarProductosConStock(req, res) {
                             modeloProductos.stock = parametros.stock;
                             modeloProductos.estado = 'Disponible';
                             modeloProductos.tipo = 'Secretaria';
+                            modeloProductos.subTipo = "ConStock";
                             modeloProductos.save((err, productoGuardado) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                 if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
@@ -73,11 +74,66 @@ function agregarProductosConStock(req, res) {
     }
 }
 
-function agregarProductosConStock(req,res){
-    if(req.user.rol == "Admin_Cafeteria"){
-        
-    }else{
-        return res.status(500).send({mensaje:"No esta autorizado"});
+function agregarProductosSinStock(req, res) {
+    var modeloProductos = new Producto();
+    var parametros = req.body;
+    if (req.user.rol == 'Admin_Cafeteria') {
+        if (parametros.producto && parametros.descripcion && parametros.precio && parametros.stock) {
+            if (parametros.precio >= 0) {
+                Producto.findOne({ producto: parametros.producto, tipo: 'Cafeteria' }, (err, productoExistente) => {
+                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                    if (!productoExistente) {
+                        modeloProductos.producto = parametros.producto;
+                        modeloProductos.descripcion = parametros.descripcion;
+                        modeloProductos.precio = parametros.precio;
+                        modeloProductos.stock = parametros.stock;
+                        modeloProductos.estado = 'Disponible';
+                        modeloProductos.tipo = 'Cafeteria';
+                        modeloProductos.subTipo = "SinStock";
+                        modeloProductos.save((err, productoGuardado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
+                            return res.status(200).send({ producto: productoGuardado });
+                        });
+                    } else {
+                        return res.status(500).send({ mensaje: 'El producto ya se encuentra en el sistema' });
+                    }
+                })
+            } else {
+                return res.status(500).send({ mensaje: 'Ingrese un precion razonable' });
+            }
+        } else {
+            return res.status(500).send({ mensaje: 'Ingresse los parametros necesarios' });
+        }
+    } else if (req.user.rol == 'Admin_Secretaria') {
+        if (parametros.producto && parametros.descripcion && parametros.precio && parametros.stock) {
+            if (parametros.precio >= 0) {
+                Producto.findOne({ producto: parametros.producto, tipo: 'Secretaria' }, (err, productoExistente) => {
+                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                    if (!productoExistente) {
+                        modeloProductos.producto = parametros.producto;
+                        modeloProductos.descripcion = parametros.descripcion;
+                        modeloProductos.precio = parametros.precio;
+                        modeloProductos.stock = parametros.stock;
+                        modeloProductos.estado = 'Disponible';
+                        modeloProductos.tipo = 'Secretaria';
+                        modeloProductos.save((err, productoGuardado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
+                            return res.status(200).send({ producto: productoGuardado });
+                        });
+                    } else {
+                        return res.status(500).send({ mensaje: 'El producto ya se encuentra en el sistema' });
+                    }
+                })
+            } else {
+                return res.status(500).send({ mensaje: 'Ingrese un precion razonable' });
+            }
+        } else {
+            return res.status(500).send({ mensaje: 'Ingresse los parametros necesarios' });
+        }
+    } else {
+        return res.status(404).send({ mensaje: 'No esta autorizado' })
     }
 }
 
@@ -135,10 +191,21 @@ function editarProductos(req, res) {
 //Editar Stock
 function editarStock(req, res) {
     var idProducto = req.params.idProducto;
-    if (req.user.rol == 'Admin_Secretaria') {
-        Producto.findById(idProducto, (err, infoProducto) => {
-            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-            if (!infoProducto) return res.status(500).send({ mensaje: 'Error al encontrar el producto' });
+    Producto.findById(idProducto, (err, infoProducto) => {
+        if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
+        if (!infoProducto) return res.status(500).send({ mensaje: "No se encontro su producto" });
+        if (req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == "Secretaria" && infoProducto.subTipo=="ConStock") {
+            if (Number(parametros.stock) + Number(infoProducto.stock) >= 0) {
+                Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
+                    (err, productoActualizado) => {
+                        if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+                        if (!productoActualizado) return res.status(404).send({ mensaje: 'Error al Editar el Producto' })
+                        return res.status(200).send({ producto: productoActualizado });
+                    }) 
+            } else {
+                return res.status(500).send({ mesnaeje: 'La cantidad a modificar' })
+            }
+        } else if (req.user.rol == "Admin_Cafeteria") {
             if (Number(parametros.stock) + Number(infoProducto.stock) >= 0) {
                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
                     (err, productoActualizado) => {
@@ -149,10 +216,10 @@ function editarStock(req, res) {
             } else {
                 return res.status(500).send({ mesnaeje: 'La cantidad a modificar' })
             }
-        })
-    } else {
-        return res.status(500).send({ mensaje: 'No esta autorizado' });
-    }
+        } else {
+            return res.status(500).send({ mensaje: 'No esta autorizado' });
+        }
+    })
 }
 
 //Eliminar Productos
@@ -240,7 +307,13 @@ function productosSecretariaPorNombre(req, res) {
 
 //Exports
 module.exports = {
-    agregarProductos,
+    agregarProductosConStock,
+    agregarProductosSinStock,
     editarProductos,
-    editarStock
+    editarStock,
+    eliminarProducto,
+    productosCafeteria,
+    productosCafeteriaPorNombre,
+    productosSecretaria,
+    productosSecretariaPorNombre
 }
