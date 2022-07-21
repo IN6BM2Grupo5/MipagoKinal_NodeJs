@@ -205,7 +205,7 @@ function editarStock(req, res) {
             } else {
                 return res.status(500).send({ mesnaeje: 'La cantidad a modificar' })
             }
-        } else if (req.user.rol == "Admin_Cafeteria") {
+        } else if (req.user.rol == "Admin_Cafeteria" && infoProducto.tipo == "Cafeteria" && infoProducto.subTipo=="ConStock") {
             if (Number(parametros.stock) + Number(infoProducto.stock) >= 0) {
                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
                     (err, productoActualizado) => {

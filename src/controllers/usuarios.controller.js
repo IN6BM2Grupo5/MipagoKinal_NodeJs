@@ -245,7 +245,7 @@ function ingresarFondos(req, res) {
 function eliminarUsuario(req, res) {
     var idUsuario = req.params.idUsuario;
     if (req.user.rol == 'Admin_APP') {
-        Usuario.findbyIdAndDelete(idUsuario, (err, usuarioEliminado) => {
+        Usuario.findByIdAndDelete(idUsuario, (err, usuarioEliminado) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!usuarioEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
             return res.status(200).send({ usuario: usuarioEliminado });
