@@ -11,29 +11,13 @@ const UsuariosSchema = Schema({
     rol: String,
     cuentaAdmin:Number,
     cuentaCafeteria:Number,
-    carritoAdmin: [{
-        descripcion: String,
-        precio:Number,
-        cantidad:Number,
-        fechaEntrega:Date,
-        subtotal:Number
-    }],
-    carritoCafeteria: [{
-        descripcion: String,
-        precio:Number,
-        cantidad:Number,
-        fechaEntrega:Date,
-        subTotal:Number
-    }],
     marbete:[{
         vehiculo:String,
         placas:String,
         modelo:String,
         fechaInicio:String,
         fechaFin:String,
-    }],
-    totalAdministracion:Number,
-    totalCafeteria:Number
+    }]
 });
 
 module.exports = mongoose.model('usuarios', UsuariosSchema);

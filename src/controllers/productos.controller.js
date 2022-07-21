@@ -126,7 +126,12 @@ function editarStock(req, res) {
             if(err) return res.status(404).send({mensaje:'Error en la peticion'});
             if(!infoProducto) return res.status(500).send({mensaje:'Error al encontrar el producto'});
             if(Number(parametros.stock)+Number(infoProducto.stock)>=0){
-                
+                Producto.findByIdAndUpdate(idProducto, {$inc: {stock: parametros.stock}}, {new:true},
+                    (err, productoActualizado)=>{
+                        if (err) return res.status(500).send({mensaje:'Error en la peticion'});
+                        if (!productoActualizado) return res.status(404).send({mensaje: 'Error al Editar el Producto'})
+                        return res.status(200).send({producto: productoActualizado});
+                    })
             }else{
                 return res.status(500).send({mesnaeje:'La cantidad a modificar'})
             }
@@ -137,5 +142,22 @@ function editarStock(req, res) {
 }
 
 //Eliminar Productos
+function eliminarProducto(req,res){
+    var idProducto = req.params.idProducto;
+
+    Producto.findById(idProducto,(err,infoProducto)=>{
+        if(req.user.rol=='Admin_Cafeteria' && infoProducto.tipo == 'Cafeteria'){
+
+        }else if(req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == 'Secretaria'){
+
+        }else{
+            return res.status(500).send({mensaje:'No esta autorizado para eliminar el producto'});
+        }
+    })
+    if(req.user.rol == 'Admin_Secretaria' || req.user.rol == 'Admin_Cafeteria'){
+
+    }
+}
+
 //productos de
 //busquedas

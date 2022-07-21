@@ -75,11 +75,7 @@ function agregarAlumno(req, res) {
                                             usuarioModel.usuario = parametros.usuario;
                                             usuarioModel.cuentaAdmin = 0;
                                             usuarioModel.cuentaCafeteria = 0;
-                                            usuarioModel.carritoAdmin = undefined;
-                                            usuarioModel.carritoCafeteria = undefined;
                                             usuarioModel.marbete = undefined;
-                                            usuarioModel.totalAdministracion = 0;
-                                            usuarioModel.totalCafeteria = 0;
                                             usuarioModel.password = passwordEncriptada;
                                             usuarioModel.save((err, usuarioGuardado) => {
                                                 if (err) return res.status(500).send({ mensaje: "Error en la peticion" });
