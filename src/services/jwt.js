@@ -6,7 +6,6 @@ exports.crearToken = function(usuarios){
     let payload = {
         sub: usuarios._id,
         nombre: usuarios.nombre,
-        usuario: usuarios.usuario,
         correo:usuarios.correo,
         carnet:usuarios.carnet,
         rol: usuarios.rol,

@@ -11,7 +11,6 @@ function AdminApp() {
             if (usuarioEcontrado.length == 0) {
                 bcrypt.hash("MipagoKinal", null, null, (err, passwordEncriptada) => {
                     Usuario.create({
-                        usuario: "MipagoKinalAdmin",
                         correo:'mipagokinaladmin@gmail.com',
                         password: passwordEncriptada,
                         rol: "Admin_APP",
@@ -55,7 +54,7 @@ function agregarAlumno(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos && parametros.correo && parametros.carnet && parametros.usuario && parametros.password) {
+        if (parametros.nombres && parametros.apellidos && parametros.correo && parametros.carnet  && parametros.password) {
             Usuario.findOne({ carnet: parametros.carnet }, (err, carnetDisponible) => {
                 if (err) return res.status(404).send({ mensaej: 'Error en la peticion' });
                 if (!carnetDisponible) {
@@ -72,7 +71,6 @@ function agregarAlumno(req, res) {
                                             usuarioModel.correo = parametros.correo.toLowerCase();
                                             usuarioModel.rol = 'Alumno';
                                             usuarioModel.carnet = parametros.carnet;
-                                            usuarioModel.usuario = parametros.usuario;
                                             usuarioModel.cuentaAdmin = 0;
                                             usuarioModel.cuentaCafeteria = 0;
                                             usuarioModel.marbete = undefined;
@@ -111,7 +109,7 @@ function AgregarAdmin(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos && parametros.usuario && parametros.parametros.password && parametros.correo) {
+        if (parametros.nombres && parametros.apellidos  && parametros.parametros.password && parametros.correo) {
             if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                 Usuario.findOne({ correo: parametros.correo }, (err, correoNoDisponible) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -124,7 +122,6 @@ function AgregarAdmin(req, res) {
                                     usuarioModel.apellidos = parametros.apellidos;
                                     usuarioModel.correo = parametros.correo.toLowerCase();
                                     usuarioModel.rol = parametros.rol;
-                                    usuarioModel.usuario = parametros.usuario;
                                     usuarioModel.password = passwordEncriptada;
                                     usuarioModel.save((err, usuarioGuardado) => {
                                         if (err) return res.status(500).send({ mensaje: "Error en la peticion" });

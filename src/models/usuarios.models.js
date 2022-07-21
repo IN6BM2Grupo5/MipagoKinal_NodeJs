@@ -5,7 +5,6 @@ const UsuariosSchema = Schema({
     nombres: String,
     apellidos: String,
     carnet:String,
-    usuario: String,
     password: String,
     correo:String,
     rol: String,
