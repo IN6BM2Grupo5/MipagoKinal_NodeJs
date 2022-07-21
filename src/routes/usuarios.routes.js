@@ -16,15 +16,15 @@ api.put('/ingresarFondos/:idAlumno',md_autenticacion.Auth, usuariosController.in
 //Eliminar Usuarios
 api.delete('/eliminarUsuario/:idUsuario',md_autenticacion.Auth, usuariosController.eliminarUsuario);
 //Usuarios
-api.get('/alumnos',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/administradoresCafeteria',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradoresCafeteria);
-api.get('/administradoresSecretaria',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradoresSecretaria);
-api.get('/administradores',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradores);
+api.get('/alumnos',md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/administradoresCafeteria',md_autenticacion.Auth, usuariosController.administradoresCafeteria);
+api.get('/administradoresSecretaria',md_autenticacion.Auth, usuariosController.administradoresSecretaria);
+api.get('/administradores',md_autenticacion.Auth, usuariosController.administradores);
 //Busquedas
-api.get('/usuarioPorId/:idUsuario',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.usuarioId);
-api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorApellido/:apellido',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorCarnet/:carnet',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorCorreo/:correo',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/usuarioPorId/:idUsuario',md_autenticacion.Auth, usuariosController.usuarioId);
+api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/alumnosPorApellido/:apellido',md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/alumnosPorCarnet/:carnet',md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/alumnosPorCorreo/:correo',md_autenticacion.Auth, usuariosController.alumnos);
 
 module.exports = api;

@@ -1,5 +1,5 @@
 const Producto = require("../models/productos.models");
-const Pedidos = require('../models/pedidos.models')
+const Pedidos = require('../models/pedidos.models');
 
 //Agregar Productos
 function agregarProductosConStock(req, res) {
@@ -141,11 +141,11 @@ function agregarProductosSinStock(req, res) {
 function editarProductos(req, res) {
     var idProducto = req.params.idProducto;
     var parametros = req.body;
-    if (req.user.rol == 'Admin_Cafeteria') {
-        if (parametros.precio >= 0) {
-            Producto.findById(idProducto, (err, infoProducto) => {
-                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                if (!infoProducto) return res.status(500).send({ mensaje: 'Error al encontrar el producto' });
+    Producto.findById(idProducto, (err, infoProducto) => {
+        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+        if (!infoProducto) return res.status(500).send({ mensaje: 'No se encontro el producto' });
+        if (req.user.rol == 'Admin_Cafeteria' && infoProducto.tipo == 'Cafeteria') {
+            if (parametros.precio >= 0) {
                 Producto.findOne({ producto: parametros.producto, tipo: 'Cafeteria' }, (err, productoEncontrado) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                     if (!productoEncontrado || parametros.producto == infoProducto.producto) {
@@ -158,15 +158,11 @@ function editarProductos(req, res) {
                         return res.status(500).send({ mensaje: 'Este producto ya se encuentra en el sistema' });
                     }
                 })
-            })
-        } else {
-            return res.status(500).send({ mensaje: 'Ingrese un precio razonable' });
-        }
-    } else if (req.user.rol == 'Admin_Secretaria') {
-        if (parametros.precio >= 0) {
-            Producto.findById(idProducto, (err, infoProducto) => {
-                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                if (!infoProducto) return res.status(500).send({ mensaje: 'Error al encontrar el producto' });
+            } else {
+                return res.status(500).send({ mensaje: 'Ingrese un precio razonable' });
+            }
+        } else if (req.user.rol == 'Admin_Secretaria') {
+            if (parametros.precio >= 0) {
                 Producto.findOne({ producto: parametros.producto, tipo: 'Secretaria' }, (err, productoEncontrado) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                     if (!productoEncontrado || parametros.producto == infoProducto.producto) {
@@ -179,13 +175,13 @@ function editarProductos(req, res) {
                         return res.status(500).send({ mensaje: 'Este producto ya se encuentra en el sistema' });
                     }
                 })
-            })
+            } else {
+                return res.status(500).send({ mensaje: 'Ingrese un precio razonable' })
+            }
         } else {
-            return res.status(500).send({ mensaje: 'Ingrese un precio razonable' })
+            return res.status(500).send({ mensaje: 'No esta autorizado para editar productos' });
         }
-    } else {
-        return res.status(500).send({ mensaje: 'No esta autorizado para editar productos' });
-    }
+    })
 }
 
 //Editar Stock
@@ -194,18 +190,18 @@ function editarStock(req, res) {
     Producto.findById(idProducto, (err, infoProducto) => {
         if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
         if (!infoProducto) return res.status(500).send({ mensaje: "No se encontro su producto" });
-        if (req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == "Secretaria" && infoProducto.subTipo=="ConStock") {
+        if (req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == "Secretaria" && infoProducto.subTipo == "ConStock") {
             if (Number(parametros.stock) + Number(infoProducto.stock) >= 0) {
                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
                     (err, productoActualizado) => {
                         if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
                         if (!productoActualizado) return res.status(404).send({ mensaje: 'Error al Editar el Producto' })
                         return res.status(200).send({ producto: productoActualizado });
-                    }) 
+                    })
             } else {
                 return res.status(500).send({ mesnaeje: 'La cantidad a modificar' })
             }
-        } else if (req.user.rol == "Admin_Cafeteria" && infoProducto.tipo == "Cafeteria" && infoProducto.subTipo=="ConStock") {
+        } else if (req.user.rol == "Admin_Cafeteria" && infoProducto.tipo == "Cafeteria" && infoProducto.subTipo == "ConStock") {
             if (Number(parametros.stock) + Number(infoProducto.stock) >= 0) {
                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
                     (err, productoActualizado) => {
@@ -253,7 +249,7 @@ function eliminarProducto(req, res) {
     })
 }
 
-//productos de
+//productos
 function productosCafeteria(req, res) {
     if (req.user.rol == "Admin_Cafeteria") {
         Producto.find({ tipo: "Cafeteria" }, (err, productosCafeteria) => {
@@ -279,6 +275,21 @@ function productosSecretaria(req, res) {
 }
 
 //busquedas
+function productoPorId(req,res){
+    var idProducto = req.params.idProducto;
+    Producto.findById(idProducto,(err,infoProducto)=>{
+        if(err) return res.status(404).send({mensaje:'Error en la peticion'});
+        if(!infoProducto) return res.status(500).send({mensaje:'Error en la peticion'});
+        if(req.user.rol == 'Admin_Cafeteria' || infoProducto.tipo == 'Cafeteria'){
+            return res.status(200).send({producto:infoProducto});
+        }else if(req.user.rol == 'Admin_Secretaria' || infoProducto.tipo=='Secretaria'){
+            return res.status(200).send({producto:infoProducto});
+        }else{
+            return res.status(500).send({mensaje:'No esta autorizados'});
+        }
+    })
+}
+
 function productosCafeteriaPorNombre(req, res) {
     var producto = req.params.producto;
     if (req.user.rol == "Admin_Cafeteria") {
@@ -315,5 +326,6 @@ module.exports = {
     productosCafeteria,
     productosCafeteriaPorNombre,
     productosSecretaria,
-    productosSecretariaPorNombre
+    productosSecretariaPorNombre,
+    productoPorId
 }
