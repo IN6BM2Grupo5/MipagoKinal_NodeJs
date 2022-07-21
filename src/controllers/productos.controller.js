@@ -174,7 +174,7 @@ function eliminarProducto(req,res){
 
 //productos de
 function productosCafeteria(req,res){
-
+    
 }
 
 function productosSecretaria(req,res){

@@ -19,6 +19,7 @@ api.delete('/eliminarUsuario/:idUsuario',md_autenticacion.Auth, usuariosControll
 api.get('/alumnos',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);
 api.get('/administradoresCafeteria',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradoresCafeteria);
 api.get('/administradoresSecretaria',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradoresSecretaria);
+api.get('/administradores',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.administradores);
 //Busquedas
 api.get('/usuarioPorId/:idUsuario',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.usuarioId);
 api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth,md_autenticacion.Auth, usuariosController.alumnos);

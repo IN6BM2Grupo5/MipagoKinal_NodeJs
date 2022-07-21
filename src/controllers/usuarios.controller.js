@@ -55,7 +55,7 @@ function agregarAlumno(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellido && parametros.correo && parametros.carnet && parametros.usuario && parametros.password) {
+        if (parametros.nombres && parametros.apellidos && parametros.correo && parametros.carnet && parametros.usuario && parametros.password) {
             Usuario.findOne({ carnet: parametros.carnet }, (err, carnetDisponible) => {
                 if (err) return res.status(404).send({ mensaej: 'Error en la peticion' });
                 if (!carnetDisponible) {
@@ -273,7 +273,7 @@ function alumnos(req, res) {
 }
 
 function administradoresSecretaria(req, res) {
-    if (req.user.rol != 'Alumno') {
+    if (req.user.rol == 'Admin_APP') {
         Usuario.find({ rol: 'Admin_Secretaria' }, (err, adminsEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
@@ -286,8 +286,21 @@ function administradoresSecretaria(req, res) {
 }
 
 function administradoresCafeteria(req, res) {
-    if (req.user.rol != 'Alumno') {
+    if (req.user.rol == 'Admin_APP') {
         Usuario.find({ rol: 'Admin_Cafeteria' }, (err, adminsEncontrados) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
+
+            return res.status(200).send({ usuarios: adminsEncontrados });
+        })
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado' });
+    }
+}
+
+function administradores(req, res) {
+    if (req.user.rol == 'Admin_APP') {
+        Usuario.find({ rol: ('Admin_Cafeteria' || "Admin_Secretaria") }, (err, adminsEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
 
@@ -375,5 +388,6 @@ module.exports = {
     editarUsuario,
     eliminarUsuario,
     ingresarFondos,
-    usuarioId
+    usuarioId,
+    administradores
 }
