@@ -109,7 +109,7 @@ function AgregarAdmin(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos  && parametros.parametros.password && parametros.correo) {
+        if (parametros.nombres && parametros.apellidos  && parametros.password && parametros.correo) {
             if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                 Usuario.findOne({ correo: parametros.correo }, (err, correoNoDisponible) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });

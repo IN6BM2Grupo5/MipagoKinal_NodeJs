@@ -2,31 +2,37 @@ const Producto = require("../models/productos.models");
 const Pedidos = require('../models/pedidos.models')
 
 //Agregar Productos
-function agregarProductos(req, res) {
+function agregarProductosConStock(req, res) {
     var modeloProductos = new Producto();
     var parametros = req.body;
     if (req.user.rol == 'Admin_Cafeteria') {
-        if (parametros.producto && parametros.descripcion && parametros.precio) {
-            if (parametros.precio >= 0) {
-                Producto.findOne({ producto: parametros.producto, tipo: 'Cafeteria' }, (err, productoExistente) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!productoExistente) {
-                        modeloProductos.producto = parametros.producto;
-                        modeloProductos.descripcion = parametros.descripcion;
-                        modeloProductos.precio = parametros.precio;
-                        modeloProductos.estado = 'Disponible';
-                        modeloProductos.tipo = 'Cafeteria';
-                        modeloProductos.save((err, productoGuardado) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
-                            return res.status(200).send({ producto: productoGuardado });
-                        });
-                    } else {
-                        return res.status(500).send({ mensaje: 'El producto ya se encuentra en el sistema' });
-                    }
-                })
+        if (parametros.producto && parametros.descripcion && parametros.precio && parametros.stock) {
+            if (parametros.stock > 0) {
+                if (parametros.precio >= 0) {
+                    Producto.findOne({ producto: parametros.producto, tipo: 'Cafeteria' }, (err, productoExistente) => {
+                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                        if (!productoExistente) {
+                            modeloProductos.producto = parametros.producto;
+                            modeloProductos.descripcion = parametros.descripcion;
+                            modeloProductos.precio = parametros.precio;
+                            modeloProductos.stock = parametros.stock;
+                            modeloProductos.estado = 'Disponible';
+                            modeloProductos.tipo = 'Cafeteria';
+                            modeloProductos.subTipo = "ConStock";
+                            modeloProductos.save((err, productoGuardado) => {
+                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
+                                return res.status(200).send({ producto: productoGuardado });
+                            });
+                        } else {
+                            return res.status(500).send({ mensaje: 'El producto ya se encuentra en el sistema' });
+                        }
+                    })
+                } else {
+                    return res.status(500).send({ mensaje: 'Ingrese un precion razonable' });
+                }
             } else {
-                return res.status(500).send({ mensaje: 'Ingrese un precion razonable' });
+                return res.status(500).send({ mensaje: 'Ingrese una cantidad del producto ' })
             }
         } else {
             return res.status(500).send({ mensaje: 'Ingresse los parametros necesarios' });
@@ -64,6 +70,14 @@ function agregarProductos(req, res) {
         }
     } else {
         return res.status(404).send({ mensaje: 'No esta autorizado' })
+    }
+}
+
+function agregarProductosConStock(req,res){
+    if(req.user.rol == "Admin_Cafeteria"){
+        
+    }else{
+        return res.status(500).send({mensaje:"No esta autorizado"});
     }
 }
 
