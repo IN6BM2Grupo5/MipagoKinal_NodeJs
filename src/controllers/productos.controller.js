@@ -145,19 +145,47 @@ function editarStock(req, res) {
 function eliminarProducto(req,res){
     var idProducto = req.params.idProducto;
 
-    Producto.findById(idProducto,(err,infoProducto)=>{
-        if(req.user.rol=='Admin_Cafeteria' && infoProducto.tipo == 'Cafeteria'){
-
-        }else if(req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == 'Secretaria'){
-
+    Pedidos.findOne({idProducto:idProducto},(err,productoPedido)=>{
+        if(err) return res.status(404).send({mensaje:'Error en la peticion'});
+        if(!productoPedido){
+            Producto.findById(idProducto,(err,infoProducto)=>{
+                if(err) return res.status(404).send({mensaje:'Error en la peticion'})
+                if(req.user.rol=='Admin_Cafeteria' && infoProducto.tipo == 'Cafeteria'){
+                    Producto.findByIdAndDelete(idProducto,(err,productoEliminado)=>{
+                        if(err) return res.status(404).send({mensaje:'Error en la peticion'})
+                        if(!productoEliminado) return res.status(500).send({mensaje:'Error al eliminar el producto'});
+                        return res.status(200).send({producto:productoEliminado})
+                    });
+                }else if(req.user.rol == 'Admin_Secretaria' && infoProducto.tipo == 'Secretaria'){
+                    Producto.findByIdAndDelete(idProducto,(err,productoEliminado)=>{
+                        if(err) return res.status(404).send({mensaje:'Error en la peticion'})
+                        if(!productoEliminado) return res.status(500).send({mensaje:'Error al eliminar el producto'});
+                        return res.status(200).send({producto:productoEliminado})
+                    });
+                }else{
+                    return res.status(500).send({mensaje:'No esta autorizado para eliminar el producto'});
+                }
+            })
         }else{
-            return res.status(500).send({mensaje:'No esta autorizado para eliminar el producto'});
+            return res.status(500).send({mensaje:'Este producto se encuentra en pedidos, complete el pedido y cambie el estado para que no sea pedido de nuevo'});
         }
     })
-    if(req.user.rol == 'Admin_Secretaria' || req.user.rol == 'Admin_Cafeteria'){
-
-    }
 }
 
 //productos de
+function productosCafeteria(req,res){
+
+}
+
+function productosSecretaria(req,res){
+
+}
+
 //busquedas
+function productosCafeteriaPorNombre(req,res){
+
+}
+
+function productosSecretariaPorNombre(req,res){
+    
+}
