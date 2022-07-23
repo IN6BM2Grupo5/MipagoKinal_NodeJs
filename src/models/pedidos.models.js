@@ -8,6 +8,7 @@ const PedidosSchema = Schema({
     alumno:String,
     carnet:String,
     tipo:String,
+    fechaPedido:String,
     idAlumno:{type: Schema.Types.ObjectId, ref: 'usuarios'},
     idProducto:{type: Schema.Types.ObjectId, ref: 'productos'},
 });

@@ -1,4 +1,5 @@
 const Usuario = require("../models/usuarios.models");
+const Pedidos = require('../models/pedidos.models');
 const bcrypt = require("bcrypt-nodejs");
 const jwt = require("../services/jwt");
 const req = require("express/lib/request");
@@ -11,7 +12,7 @@ function AdminApp() {
             if (usuarioEcontrado.length == 0) {
                 bcrypt.hash("MipagoKinal", null, null, (err, passwordEncriptada) => {
                     Usuario.create({
-                        correo:'mipagokinaladmin@gmail.com',
+                        correo: 'mipagokinaladmin@gmail.com',
                         password: passwordEncriptada,
                         rol: "Admin_APP",
                     });
@@ -54,7 +55,7 @@ function agregarAlumno(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos && parametros.correo && parametros.carnet  && parametros.password) {
+        if (parametros.nombres && parametros.apellidos && parametros.correo && parametros.carnet && parametros.password) {
             Usuario.findOne({ carnet: parametros.carnet }, (err, carnetDisponible) => {
                 if (err) return res.status(404).send({ mensaej: 'Error en la peticion' });
                 if (!carnetDisponible) {
@@ -73,8 +74,16 @@ function agregarAlumno(req, res) {
                                             usuarioModel.carnet = parametros.carnet;
                                             usuarioModel.cuentaAdmin = 0;
                                             usuarioModel.cuentaCafeteria = 0;
-                                            usuarioModel.marbete = undefined;
+                                            usuarioModel.marbete = [{
+                                                vehiculo: '',
+                                                placas: '',
+                                                modelo: '',
+                                                fechaInicio: '',
+                                                fechaFin: ''
+                                            }];
                                             usuarioModel.password = passwordEncriptada;
+                                            usuarioModel.strikes = 0;
+                                            usuarioModel.fechaBaneo = '';
                                             usuarioModel.save((err, usuarioGuardado) => {
                                                 if (err) return res.status(500).send({ mensaje: "Error en la peticion" });
                                                 if (!usuarioGuardado) return res.status(500).send({ mensaje: "Error al agregar el Usuario" });
@@ -109,7 +118,7 @@ function AgregarAdmin(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos  && parametros.password && parametros.correo) {
+        if (parametros.nombres && parametros.apellidos && parametros.password && parametros.correo) {
             if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                 Usuario.findOne({ correo: parametros.correo }, (err, correoNoDisponible) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -158,30 +167,39 @@ function editarUsuario(req, res) {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (infoUsuario) {
                 if (infoUsuario.rol == 'Alumno') {
-                    Usuario.findOne({ carnet: parametros.carnet }, (err, canetUsado) => {
+                    Pedidos.findOne({ idUsuario: idUsuario }, (err, pedidoEncontrado) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!canetUsado || parametros.carnet == infoUsuario.carnet) {
-                            if (parametros.correo.endsWith('@kinal.edu.gt')) {
-                                Usuario.findOne({ correo: parametros.correo }, (err, correoUsado) => {
-                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                    if (!correoUsado || parametros.correo == infoUsuario.correo) {
-                                        Usuario.findByIdAndUpdate(idUsuario, parametros, { new: true }, (err, usuarioEditado) => {
-                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                            if (!usuarioEditado) return res.status(500).send({ mensaej: 'Error al editar el usuario' });
-
-                                            return res.status(200).send({ usuario: usuarioEditado });
-                                        })
-                                    } else {
-                                        return res.status(500).send({ mensaje: 'El correo ya se encuentra en el sistema' });
-                                    }
-                                })
-                            } else {
-                                return res.status(500).send({ mensaej: 'Ingrese una direccion de correo valida' })
-                            }
-                        } else {
-                            return res.status(500).send({ mensaje: 'Este carnet no esta disponible' });
+                        if (pedidoEncontrado) {
+                            Pedidos.updateMany({ idUsuario: idUsuario }, { alumno: parametros.nombres + ' ' + parametros.apellidos, carnet: parametros.carnet }, (err, pedidoActualizado) => {
+                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al editar los pedidos' });
+                            })
                         }
-                    });
+                        Usuario.findOne({ carnet: parametros.carnet }, (err, canetUsado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!canetUsado || parametros.carnet == infoUsuario.carnet) {
+                                if (parametros.correo.endsWith('@kinal.edu.gt')) {
+                                    Usuario.findOne({ correo: parametros.correo }, (err, correoUsado) => {
+                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                        if (!correoUsado || parametros.correo == infoUsuario.correo) {
+                                            Usuario.findByIdAndUpdate(idUsuario, parametros, { new: true }, (err, usuarioEditado) => {
+                                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                if (!usuarioEditado) return res.status(500).send({ mensaej: 'Error al editar el usuario' });
+
+                                                return res.status(200).send({ usuario: usuarioEditado });
+                                            })
+                                        } else {
+                                            return res.status(500).send({ mensaje: 'El correo ya se encuentra en el sistema' });
+                                        }
+                                    })
+                                } else {
+                                    return res.status(500).send({ mensaej: 'Ingrese una direccion de correo valida' })
+                                }
+                            } else {
+                                return res.status(500).send({ mensaje: 'Este carnet no esta disponible' });
+                            }
+                        });
+                    })
                 } else if (infoUsuario.rol == 'Admin_Cafeteria' || infoUsuario.rol == 'Admin_Secretaria') {
                     if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                         Usuario.findOne({ correo: parametros.correo }, (err, correoUsado) => {
@@ -207,6 +225,41 @@ function editarUsuario(req, res) {
         })
     } else {
         return res.status(404).send({ mensaje: 'No esta autorizado para editar el usuario' });
+    }
+}
+
+function ingresarVehiculo(req, res) {
+    var parametros = req.body;
+    if (req.user.rol == "Alumno") {
+        if (parametros.vehiculo && parametros.placas && parametros.modelo) {
+            Usuario.findById(req.user.sub, (err, infoAlumno) => {
+                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                if (!infoAlumno) return res.status(500).send({ mensaje: 'No se encontro la informacion del alumno' });
+                if (infoAlumno.marbete[0].fechaInicio != '') {
+                    return res.status(500).send({ mensaje: 'usted ya cuenta con un marbete que caduca el ' + infoAlumno.marbete[0].fechaFin })
+                } else if (infoAlumno.marbete[0].vehiculo != '') {
+                    Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
+                        { 'marbete.$.vehiculo': parametros.vehiculo, 'marbete.$.placas': parametros.placas, 'marbete.$.modelo': parametros.modelo },
+                        { new: true },
+                        (err, usuarioEditado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
+                            return res.status(200).send({ vehiculo: usuarioEditado.marbete[0] });
+                        })
+                } else {
+                    Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
+                        { 'marbete.$.vehiculo': parametros.vehiculo, 'marbete.$.placas': parametros.placas, 'marbete.$.modelo': parametros.modelo },
+                        { new: true },
+                        (err, usuarioEditado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
+                            return res.status(200).send({ vehiculo: usuarioEditado.marbete[0] });
+                        })
+                }
+            })
+        }
+    } else {
+        return res.status(500).send({ mensaje: 'No esta autorizado para ingresar un vehiculo' });
     }
 }
 
@@ -245,11 +298,26 @@ function ingresarFondos(req, res) {
 function eliminarUsuario(req, res) {
     var idUsuario = req.params.idUsuario;
     if (req.user.rol == 'Admin_APP') {
-        Usuario.findByIdAndDelete(idUsuario, (err, usuarioEliminado) => {
+        Pedidos.find({ idUsuario: idUsuario }, (err, pedidoEncontrado) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-            if (!usuarioEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
-            return res.status(200).send({ usuario: usuarioEliminado });
-        })
+            if (pedidoEncontrado != 0) {
+                for (let i = 0; i < pedidoEncontrado.length; i++) {
+                    Producto.findByIdAndUpdate(pedidoEncontrado[i].idProducto, { $inc: { stock: pedidoEncontrado[i].cantidad } }, { new: true }, (err, productosActualizados) => {
+                        if (err) return res.status(404).send({ mensaje: 'Error en la peticionS' });
+                        if (!productosActualizados) return res.status(500).send({ mensaje: 'Error al actualizar el producto' });
+                    })
+                }
+                Pedidos.deleteMany({ idUsuario: idUsuario }, (err, pedidosEliminados) => {
+                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                    if (!pedidosEliminados) return res.status(500).send({ mensaje: 'Error al eliminar los productos' });
+                })
+            }
+            Usuario.findByIdAndDelete(idUsuario, (err, usuarioEliminado) => {
+                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                if (!usuarioEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
+                return res.status(200).send({ usuario: usuarioEliminado });
+            })
+        });
     } else {
         return res.status(500).send({ mensaje: 'No esta autorizado para eliminar un usuario' });
     }
@@ -305,6 +373,22 @@ function administradores(req, res) {
         })
     } else {
         return res.status(500).send({ mensaje: 'No esta autorizado' });
+    }
+}
+
+function verMarbete(req,res){
+    if(req.user.rol == 'Alumno'){
+        Usuario.findById(req.user.sub,(err,infoAlumno)=>{
+            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
+            if(!infoAlumno) return res.status(500).send({mensaje:'Error al cargar los datos del usuario'});
+            if(infoAlumno.marbete[0].fechaInicio!=''){
+                return res.status(200).send({marbete:infoAlumno.marbete[0]})
+            }else{
+                return res.status(500).send({mensaje:'Usted no ha tramitado su marbete'})
+            }
+        })
+    }else{
+        return res.status(500).send({mensaje:'Solo los alumnos pueden ver su marbete'});
     }
 }
 
@@ -386,5 +470,7 @@ module.exports = {
     eliminarUsuario,
     ingresarFondos,
     usuarioId,
-    administradores
+    administradores,
+    ingresarVehiculo,
+    verMarbete
 }

@@ -10,12 +10,14 @@ const UsuariosSchema = Schema({
     rol: String,
     cuentaAdmin:Number,
     cuentaCafeteria:Number,
+    strikes:Number,
+    fechaBaneo:String,
     marbete:[{
         vehiculo:String,
         placas:String,
         modelo:String,
         fechaInicio:String,
-        fechaFin:String,
+        fechaFin:String
     }]
 });
 

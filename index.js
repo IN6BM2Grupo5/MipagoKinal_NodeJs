@@ -9,7 +9,7 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }).then(
     console.log("Se encuentra conectado a la base de datos.");
 
     app.listen(3000, function () {
-        console.log("Mipago Kinal, esta ejecutandose!")
+        console.log("Mipago Kinal, esta ejecutandose!");
     })
 
 }).catch(error => console.log(error));

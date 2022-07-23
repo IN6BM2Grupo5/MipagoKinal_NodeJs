@@ -11,6 +11,7 @@ api.post('/agregarAlumno',md_autenticacion.Auth, usuariosController.agregarAlumn
 api.post('/agregarAdmin',md_autenticacion.Auth, usuariosController.AgregarAdmin);
 //Editar Usuarios
 api.put('/editarUsuario/:idUsuario',md_autenticacion.Auth, usuariosController.editarUsuario);
+api.put('/ingresarVehiculo',md_autenticacion.Auth, usuariosController.ingresarVehiculo);
 //Ingresar Fondos
 api.put('/ingresarFondos/:idAlumno',md_autenticacion.Auth, usuariosController.ingresarFondos);
 //Eliminar Usuarios
@@ -20,6 +21,7 @@ api.get('/alumnos',md_autenticacion.Auth, usuariosController.alumnos);
 api.get('/administradoresCafeteria',md_autenticacion.Auth, usuariosController.administradoresCafeteria);
 api.get('/administradoresSecretaria',md_autenticacion.Auth, usuariosController.administradoresSecretaria);
 api.get('/administradores',md_autenticacion.Auth, usuariosController.administradores);
+api.get('/verMarbete',md_autenticacion.Auth, usuariosController.verMarbete);
 //Busquedas
 api.get('/usuarioPorId/:idUsuario',md_autenticacion.Auth, usuariosController.usuarioId);
 api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth, usuariosController.alumnos);
