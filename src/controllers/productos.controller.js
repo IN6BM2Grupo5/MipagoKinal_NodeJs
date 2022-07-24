@@ -265,7 +265,7 @@ function eliminarProducto(req, res) {
 
 //productos
 function productosCafeteria(req, res) {
-    if (req.user.rol == "Admin_Cafeteria") {
+    if (req.user.rol == "Admin_Cafeteria"|| req.user.rol =='Alumno') {
         Producto.find({ tipo: "Cafeteria" }, (err, productosCafeteria) => {
             if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
             if (!productosCafeteria) return res.status(500).send({ mensaje: "No se encontraron productos" });
@@ -277,7 +277,7 @@ function productosCafeteria(req, res) {
 }
 
 function productosSecretaria(req, res) {
-    if (req.user.rol == "Admin_Secretaria") {
+    if (req.user.rol == "Admin_Secretaria"|| req.user.rol =='Alumno') {
         Producto.find({ tipo: "Secretaria" }, (err, productosCafeteria) => {
             if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
             if (!productosCafeteria) return res.status(500).send({ mensaje: "No se encontraron productos" });
@@ -306,7 +306,7 @@ function productoPorId(req, res) {
 
 function productosCafeteriaPorNombre(req, res) {
     var producto = req.params.producto;
-    if (req.user.rol == "Admin_Cafeteria") {
+    if (req.user.rol == "Admin_Cafeteria"||req.user.rol =='Alumno') {
         Producto.find({ tipo: "Cafeteria", producto: { $regex: producto, $options: 'i' } }, (err, productosCafeteria) => {
             if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
             if (!productosCafeteria) return res.status(500).send({ mensaje: "No se encontraron productos" });
@@ -319,7 +319,7 @@ function productosCafeteriaPorNombre(req, res) {
 
 function productosSecretariaPorNombre(req, res) {
     var producto = req.params.producto;
-    if (req.user.rol == "Admin_Secretaria") {
+    if (req.user.rol == "Admin_Secretaria"||req.user.rol =='Alumno') {
         Producto.find({ tipo: "Secretaria", producto: { $regex: producto, $options: 'i' } }, (err, productosCafeteria) => {
             if (err) return res.status(404).send({ mensaje: "Error en la peticion" });
             if (!productosCafeteria) return res.status(500).send({ mensaje: "No se encontraron productos" });
