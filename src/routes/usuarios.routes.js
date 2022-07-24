@@ -24,9 +24,9 @@ api.get('/administradores',md_autenticacion.Auth, usuariosController.administrad
 api.get('/verMarbete',md_autenticacion.Auth, usuariosController.verMarbete);
 //Busquedas
 api.get('/usuarioPorId/:idUsuario',md_autenticacion.Auth, usuariosController.usuarioId);
-api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorApellido/:apellido',md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorCarnet/:carnet',md_autenticacion.Auth, usuariosController.alumnos);
-api.get('/alumnosPorCorreo/:correo',md_autenticacion.Auth, usuariosController.alumnos);
+api.get('/alumnosPorNombre/:nombre',md_autenticacion.Auth, usuariosController.alumnosPorNombres);
+api.get('/alumnosPorApellido/:apellido',md_autenticacion.Auth, usuariosController.alumnosPorApellidos);
+api.get('/alumnosPorCarnet/:carnet',md_autenticacion.Auth, usuariosController.alumnosPorCarnet);
+api.get('/alumnosPorCorreo/:correo',md_autenticacion.Auth, usuariosController.alumnosPorCorreo);
 
 module.exports = api;
