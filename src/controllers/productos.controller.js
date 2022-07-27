@@ -113,6 +113,7 @@ function agregarProductosConStock(req, res) {
                                 modeloProductos.stock = 0;
                                 modeloProductos.estado = 'Disponible';
                                 modeloProductos.tipo = 'Secretaria';
+                                modeloProductos.subTipo = "SinStock";
                                 modeloProductos.save((err, productoGuardado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el producto' });
