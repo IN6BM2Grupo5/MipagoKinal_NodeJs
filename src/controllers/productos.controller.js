@@ -157,7 +157,7 @@ function editarProductos(req, res) {
                                     parametros.stock = 0
                                     parametros.subTipo= "SinStock"
                                 }else if(parametros.subTipo == 'Si'){
-                                    parametros.subTipo=='ConStock'
+                                    parametros.subTipo='ConStock'
                                 }
                                 Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado,subTipo:parametros.subTipo} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -187,7 +187,7 @@ function editarProductos(req, res) {
                                     parametros.stock = 0
                                     parametros.subTipo= "SinStock"
                                 }else if(parametros.subTipo == 'Si'){
-                                    parametros.subTipo=='ConStock'
+                                    parametros.subTipo='ConStock'
                                 }
                                 Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado,subTipo:parametros.subTipo} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
