@@ -158,7 +158,12 @@ function editarProductos(req, res) {
                                     parametros.stock = 0;
                                 } else if (parametros.subTipo == 'Si') {
                                     parametros.subTipo = 'ConStock'
-                                    if(parametros.stock==0) return res.status(500).send({mensaje:'Ingrese una cantidad para el stock'});
+                                    if(parametros.stock==0){
+                                        Producto.findByIdAndUpdate(idProducto,{disponiblidad:'No Disponible'},{new:true},(err,disponiblidadEditada)=>{
+                                            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
+                                            if(!disponiblidadEditada) return res.status(500).send({mensaje:'No se logro editar la disponibilidad'})
+                                        })
+                                    } 
                                 }
                                 Producto.findByIdAndUpdate(idProducto, parametros, { new: true }, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -182,7 +187,12 @@ function editarProductos(req, res) {
                                     parametros.stock = 0;
                                 } else if (parametros.subTipo == 'Si') {
                                     parametros.subTipo = 'ConStock'
-                                    if(parametros.stock==0) return res.status(500).send({mensaje:'Ingrese una cantidad para el stock'});
+                                    if(parametros.stock==0){
+                                        Producto.findByIdAndUpdate(idProducto,{disponiblidad:'No Disponible'},{new:true},(err,disponiblidadEditada)=>{
+                                            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
+                                            if(!disponiblidadEditada) return res.status(500).send({mensaje:'No se logro editar la disponibilidad'})
+                                        })
+                                    } 
                                 }
                                 Producto.findByIdAndUpdate(idProducto, parametros, { new: true }, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });

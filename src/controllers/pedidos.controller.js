@@ -10,8 +10,21 @@ function pedido(req, res) {
     var parametros = req.body;
     const date = new Date();
     var precioProductos;
-    const tiempoTranscurrido = date.getDate() + ':' + (date.getMonth() + 1) + ':' + date.getFullYear();
-    const mesPronto = date.getDate() + ':' + (date.getMonth() + 2) + ':' + date.getFullYear();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     if (req.user.rol == 'Alumno') {
         Usuario.findById(req.user.sub, (err, infoAlumno) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -30,19 +43,20 @@ function pedido(req, res) {
                             var dPedido = fechaPedido.getDay();
                             if (fPedido >= fhoy) {
                                 if (dPedido == 0 || dPedido == 6) return res.status(500).send({ mensaje: 'No se pueden realizar pedidos para los fines de semana' });
-                                if (fPedido < fomes) return res.status(500).send({ mensaje: 'No se pueden hacer pedidos para mas de un mes' });
-                                if (infoProducto.tipo == 'ConStock') {
+                                if (fPedido > fomes) return res.status(500).send({ mensaje: 'No se pueden hacer pedidos para mas de un mes' });
+                                if (infoProducto.subTipo == 'ConStock') {
                                     if (infoProducto.stock >= parametros.cantidad) {
                                         precioProductos = Number(infoProducto.precio) * Number(parametros.cantidad);
+                                        console.log(precioProductos);
                                         if (infoProducto.tipo == 'Cafeteria') {
                                             if (precioProductos <= infoAlumno.cuentaCafeteria) {
                                                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.cantidad * -1 } }, { new: true }, (err, stockActualizado) => {
                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                     if (!stockActualizado) return res.status(500).send({ mensaje: 'Error en la peticion' });
-                                                    if(stockActualizado.stock==0){
-                                                        Producto.findByIdAndUpdate(idProducto,{estado:'No Disponible'},{new:true},(err,disponiblidad)=>{
-                                                            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                            if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
+                                                    if (stockActualizado.stock == 0) {
+                                                        Producto.findByIdAndUpdate(idProducto, { estado: 'No Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                            if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
                                                         })
                                                     }
                                                     Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: precioProductos * -1 } }, { new: true }, (err, cuentaActualizada) => {
@@ -83,10 +97,10 @@ function pedido(req, res) {
                                                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.cantidad * -1 } }, { new: true }, (err, stockActualizado) => {
                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                     if (!stockActualizado) return res.status(500).send({ mensaje: 'Error en la peticion' });
-                                                    if(stockActualizado.stock==0){
-                                                        Producto.findByIdAndUpdate(idProducto,{estado:'No Disponible'},{new:true},(err,disponiblidad)=>{
-                                                            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                            if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
+                                                    if (stockActualizado.stock == 0) {
+                                                        Producto.findByIdAndUpdate(idProducto, { estado: 'No Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                            if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
                                                         })
                                                     }
                                                     Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: precioProductos * -1 } }, { new: true }, (err, cuentaActualizada) => {
@@ -126,8 +140,9 @@ function pedido(req, res) {
                                     } else {
                                         return res.status(500).send({ mensaje: 'No contamos con el stock necesario' })
                                     }
-                                } else if (infoProducto.tipo == 'SinStock') {
+                                } else if (infoProducto.subTipo == 'SinStock') {
                                     precioProductos = Number(infoProducto.precio) * Number(parametros.cantidad);
+                                    console.log(precioProductos)
                                     if (infoProducto.tipo == 'Cafeteria') {
                                         if (precioProductos <= infoAlumno.cuentaCafeteria) {
                                             Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: precioProductos * -1 } }, { new: true }, (err, cuentaActualizada) => {
@@ -265,89 +280,156 @@ function pedirMarbete(req, res) {
 function cancelarPedido(req, res) {
     var idPedido = req.params.idPedido;
     const date = new Date();
-    const tiempoTranscurrido = date.getDate() + ':' + (date.getMonth() + 1) + ':' + date.getFullYear();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     var cantidad;
     Pedidos.findById(idPedido, (err, infoPedido) => {
         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
         if (!infoPedido) return res.status(500).send({ mensaje: 'Error al encontrar el pedido' });
-        Producto.findById(infoPedido.idProducto,(err,infoProducto) => {
-            if(err) return res.status(404).send({mensaje:'error en la peticion'});
-            if(!infoProducto) return res.status(500).send({mensaje:'Error al encontrar el producto'});
-            if(infoProducto.subTipo=="SinStock"){
-                cantidad=0;
-            }else{
+        Producto.findById(infoPedido.idProducto, (err, infoProducto) => {
+            if (err) return res.status(404).send({ mensaje: 'error en la peticion' });
+            if (!infoProducto) return res.status(500).send({ mensaje: 'Error al encontrar el producto' });
+            if (infoProducto.subTipo == "SinStock") {
+                cantidad = 0;
+            } else {
                 cantidad = infoPedido.cantidad;
             }
             var fhoy = new Date(tiempoTranscurrido).getTime();
-        var fped = new Date(infoPedido.fechaPedido).getTime();
-        if (req.user.rol == 'Alumno') {
-            if (fhoy >= fped) return res.status(500).send({ mensaje: 'El pedido ya no puede cancelarse, habla con un administrador para solucionar el problema' });
-            if (infoPedido.tipo = 'Cafeteria') {
-                Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                    Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+            var fped = new Date(infoPedido.fechaPedido).getTime();
+            if (req.user.rol == 'Alumno') {
+                if (fhoy >= fped) return res.status(500).send({ mensaje: 'El pedido ya no puede cancelarse, habla con un administrador para solucionar el problema' });
+                if (infoPedido.tipo = 'Cafeteria') {
+                    Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                        if(stockActualizado.stock>0){
-                            Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                            })
-                        }
-                        Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                        if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                        Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                            return res.status(200).send({ pedido: pedidoEliminado });
-                        });
-                    });
-                });
-            } else if (infoPedido.tipo = 'Secretaria') {
-                Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                    Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
-                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                        if(stockActualizado.stock>0){
-                            Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                            })
-                        }
-                        Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                            return res.status(200).send({ pedido: pedidoEliminado });
-                        });
-                    });
-                });
-            }
-        } else if (req.user.rol == "Admin_Cafeteria" || req.user.rol == 'Admin_Secretaria') {
-            if (infoPedido.producto == 'Marbete' && req.user.rol == 'Admin_Secretaria') {
-                Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                    Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                        return res.status(200).send({ pedido: pedidoEliminado });
-                    });
-                });
-            } else {
-                if (fhoy >= fped) {
-                    Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { strikes: 1 } }, { new: true }, (err, strikesActualizados) => {
-                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!strikesActualizados) return res.status(500).send({ mensaje: 'Error al actualizar los strikes' });
-                        if (strikesActualizados.strikes = 3) {
-                            var unasem = new Date();
-                            unasem = Number(unasem);
-                            unasem += 7 * 24 * 60 * 60 * 1000;
-                            unasem = new Date(unasem);
-                            unasem = unasem.getDate() + ':' + (unasem.getMonth() + 1) + ':' + unasem.getFullYear();
-                            Usuario.findByIdAndUpdate(infoPedido.idAlumno, { fechaBaneo: unasem }, { new: true }, (err, usuarioBaneado) => {
+                            if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                            if (stockActualizado.stock > 0) {
+                                Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                })
+                            }
+                            Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                if (!usuarioBaneado) return res.status(500).send({ mensaje: 'Error al banear al usuario' });
+                                if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                return res.status(200).send({ pedido: pedidoEliminado });
+                            });
+                        });
+                    });
+                } else if (infoPedido.tipo = 'Secretaria') {
+                    Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                        if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                        Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                            if (stockActualizado.stock > 0) {
+                                Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                })
+                            }
+                            Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                return res.status(200).send({ pedido: pedidoEliminado });
+                            });
+                        });
+                    });
+                }
+            } else if (req.user.rol == "Admin_Cafeteria" || req.user.rol == 'Admin_Secretaria') {
+                if (infoPedido.producto == 'Marbete' && req.user.rol == 'Admin_Secretaria') {
+                    Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                        if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                        Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                            return res.status(200).send({ pedido: pedidoEliminado });
+                        });
+                    });
+                } else {
+                    if (fhoy >= fped) {
+                        Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { strikes: 1 } }, { new: true }, (err, strikesActualizados) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!strikesActualizados) return res.status(500).send({ mensaje: 'Error al actualizar los strikes' });
+                            if (strikesActualizados.strikes = 3) {
+                                var unasem = new Date();
+                                unasem = Number(unasem);
+                                unasem += 7 * 24 * 60 * 60 * 1000;
+                                unasem = new Date(unasem);
+                                if ((ununasemMes.getMonth() + 1) <= 9 && unasem.getDate() > 9) {
+                                    unasem = unasem.getFullYear() + '-' + '0' + (unasem.getMonth() + 1) + '-' + unasem.getDate();
+                                } else if ((unasem.getMonth() + 1) <= 9 && unasem.getDate() <= 9) {
+                                    unasem = unasem.getFullYear() + '-' + '0' + (unasem.getMonth() + 1) + '-' + '0' + unasem.getDate();
+                                } else if ((unasem.getMonth() + 1) > 9 && unasem.getDate() <= 9) {
+                                    unasem = unasem.getFullYear() + '-' + (unasem.getMonth() + 1) + '-' + '0' + unasem.getDate();
+                                } else {
+                                    unasem = unasem.getFullYear() + '-' + (unasem.getMonth() + 1) + '-' + unasem.getDate();
+                                }
+                                Usuario.findByIdAndUpdate(infoPedido.idAlumno, { fechaBaneo: unasem }, { new: true }, (err, usuarioBaneado) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!usuarioBaneado) return res.status(500).send({ mensaje: 'Error al banear al usuario' });
+                                    if (infoPedido.tipo = 'Cafeteria') {
+                                        Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                            if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                            Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+                                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                                                if (stockActualizado.stock > 0) {
+                                                    Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                        if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                                    })
+                                                }
+                                                Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                    if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                                    return res.status(200).send({ pedido: pedidoEliminado });
+                                                });
+                                            });
+                                        });
+                                    } else if (infoPedido.tipo = 'Secretaria') {
+                                        Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                            if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                            Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+                                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                                                if (stockActualizado.stock > 0) {
+                                                    Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                        if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                                    })
+                                                }
+                                                Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                    if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                                    return res.status(200).send({ pedido: pedidoEliminado });
+                                                });
+                                            });
+                                        });
+                                    }
+                                })
+                            } else if (strikesActualizados.strikes > 3) {
+                                return res.status(500).send({ mensaje: 'Usted ya ha sido baneado' })
+                            } else {
                                 if (infoPedido.tipo = 'Cafeteria') {
                                     Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -355,10 +437,10 @@ function cancelarPedido(req, res) {
                                         Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                             if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                            if(stockActualizado.stock>0){
-                                                Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                                    if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                    if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
+                                            if (stockActualizado.stock > 0) {
+                                                Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                    if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
                                                 })
                                             }
                                             Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
@@ -375,10 +457,10 @@ function cancelarPedido(req, res) {
                                         Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                             if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                            if(stockActualizado.stock>0){
-                                                Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                                    if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                    if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
+                                            if (stockActualizado.stock > 0) {
+                                                Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                                    if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
                                                 })
                                             }
                                             Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
@@ -389,100 +471,55 @@ function cancelarPedido(req, res) {
                                         });
                                     });
                                 }
-                            })
-                        } else if (strikesActualizados.strikes > 3) {
-                            return res.status(500).send({ mensaje: 'Usted ya ha sido baneado' })
-                        } else {
-                            if (infoPedido.tipo = 'Cafeteria') {
-                                Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                    if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                                    Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
-                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                        if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                        if(stockActualizado.stock>0){
-                                            Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                                if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                                            })
-                                        }
-                                        Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                            if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                                            return res.status(200).send({ pedido: pedidoEliminado });
-                                        });
-                                    });
-                                });
-                            } else if (infoPedido.tipo = 'Secretaria') {
-                                Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                    if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                                    Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
-                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                        if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                        if(stockActualizado.stock>0){
-                                            Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                                if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                                if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                                            })
-                                        }
-                                        Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                            if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                                            return res.status(200).send({ pedido: pedidoEliminado });
-                                        });
-                                    });
-                                });
                             }
+                        })
+                    } else {
+                        if (infoPedido.tipo = 'Cafeteria') {
+                            Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                                    if (stockActualizado.stock > 0) {
+                                        Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                            if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                        })
+                                    }
+                                    Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                        if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                        return res.status(200).send({ pedido: pedidoEliminado });
+                                    });
+                                });
+                            });
+                        } else if (infoPedido.tipo = 'Secretaria') {
+                            Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
+                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
+                                    if (stockActualizado.stock > 0) {
+                                        Producto.findByIdAndUpdate(infoPedido.idProducto, { estado: 'Disponible' }, { new: true }, (err, disponiblidad) => {
+                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                            if (!disponiblidad) return res.status(500).send({ mensaje: 'Error al actualizar la disponibilidad' });
+                                        })
+                                    }
+                                    Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
+                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                        if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
+                                        return res.status(200).send({ pedido: pedidoEliminado });
+                                    });
+                                });
+                            });
                         }
-                    })
-                } else {
-                    if (infoPedido.tipo = 'Cafeteria') {
-                        Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                            Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
-                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                if(stockActualizado.stock>0){
-                                    Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                        if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                        if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                                    })
-                                }
-                                Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                    if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                                    return res.status(200).send({ pedido: pedidoEliminado });
-                                });
-                            });
-                        });
-                    } else if (infoPedido.tipo = 'Secretaria') {
-                        Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                            Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
-                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
-                                if(stockActualizado.stock>0){
-                                    Producto.findByIdAndUpdate(infoPedido.idProducto,{estado:'Disponible'},{new:true},(err,disponiblidad)=>{
-                                        if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-                                        if(!disponiblidad) return res.status(500).send({mensaje:'Error al actualizar la disponibilidad'});
-                                    })
-                                }
-                                Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
-                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                    if (!pedidoEliminado) return res.status(500).send({ mensaje: 'Error al eliminar el pedido' });
-                                    return res.status(200).send({ pedido: pedidoEliminado });
-                                });
-                            });
-                        });
                     }
                 }
+            } else {
+                return res.status(500).send({ mensaje: 'No esta autorizado para cancelar un pedido' });
             }
-        } else {
-            return res.status(500).send({ mensaje: 'No esta autorizado para cancelar un pedido' });
-        }
         })
     })
 }
@@ -490,17 +527,38 @@ function cancelarPedido(req, res) {
 function confirmarEntrega(req, res) {
     var idPedido = req.params.idPedido;
     const date = new Date();
-    const tiempoTranscurrido = date.getDate() + ':' + (date.getMonth() + 1) + ':' + date.getFullYear();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     if (req.user.rol == 'Admin_Secretaria' || req.user.rol == 'Admin_Cafeteria') {
         Pedidos.findById(idPedido, (err, infoPedido) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!infoPedido) return res.status(500).send({ mensaje: 'Error al encontrar el pedido' });
             if (infoPedido.producto = 'Marbete') {
-                var unMes = new Date();
                 unMes = Number(unMes);
                 unMes += 30 * 24 * 60 * 60 * 1000;
                 unMes = new Date(unMes);
-                unMes = unMes.getDate() + ':' + (unMes.getMonth() + 1) + ':' + unMes.getFullYear();
+                if ((unMes.getMonth() + 1) <= 9 && unMes.getDate() > 9) {
+                    unMes = unMes.getFullYear() + '-' + '0' + (unMes.getMonth() + 1) + '-' + unMes.getDate();
+                } else if ((unMes.getMonth() + 1) <= 9 && unMes.getDate() <= 9) {
+                    unMes = unMes.getFullYear() + '-' + '0' + (unMes.getMonth() + 1) + '-' + '0' + unMes.getDate();
+                } else if ((unMes.getMonth() + 1) > 9 && unMes.getDate() <= 9) {
+                    unMes = unMes.getFullYear() + '-' + (unMes.getMonth() + 1) + '-' + '0' + unMes.getDate();
+                } else {
+                    unMes = unMes.getFullYear() + '-' + (unMes.getMonth() + 1) + '-' + unMes.getDate();
+                }
                 Usuario.findById(idPedido.idUsuario, (err, infoAlumno) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                     if (!infoAlumno) return res.status(500).send({ mensaje: 'Error al encontrar el usuario' });
@@ -538,7 +596,21 @@ function confirmarEntrega(req, res) {
 //verPedidos
 function verPedidos(req, res) {
     const date = new Date();
-    const tiempoTranscurrido = date.getDate() + ':' + (date.getMonth() + 1) + ':' + date.getFullYear();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     if (req.user.rol == 'Admin_Secretaria') {
         Pedidos.find({ tipo: 'Secretaria' }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -585,7 +657,21 @@ function verPedidos(req, res) {
 
 function verPedidosAdminHoy(req, res) {
     const date = new Date();
-    const tiempoTranscurrido = date.getDate() + ':' + (date.getMonth() + 1) + ':' + date.getFullYear();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     if (req.user.rol == 'Admin_Secretaria') {
         Pedidos.find({ tipo: 'Secretaria', fechaPedido: tiempoTranscurrido }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });

@@ -5,7 +5,7 @@ const md_autenticacion = require('../middlewares/autenticacion');
 var api = express.Router();
 
 //Pedidos
-api.post('/pedido/idProducto', md_autenticacion.Auth, pedidoController.pedido);
+api.post('/pedido/:idProducto', md_autenticacion.Auth, pedidoController.pedido);
 api.post('/pedirMarbete', md_autenticacion.Auth, pedidoController.pedirMarbete);
 //Cancelar Pedidos
 api.put('/cancelarPedido/:idPedido', md_autenticacion.Auth, pedidoController.cancelarPedido);
