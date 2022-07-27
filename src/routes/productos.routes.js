@@ -8,8 +8,6 @@ var api= express.Router();
 api.post('/productoConStock',md_autenticacion.Auth, productosController.agregarProductosConStock);
 //Editar Productos
 api.put('/editarProducto/:idProducto',md_autenticacion.Auth, productosController.editarProductos);
-//Editar Stock
-api.put('/editarStockProducto/:idProducto',md_autenticacion.Auth, productosController.editarStock);
 //Eliminar Productos
 api.delete('/eliminarProductos/:idProducto',md_autenticacion.Auth, productosController.eliminarProducto);
 //Productos

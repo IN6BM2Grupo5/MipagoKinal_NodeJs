@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const PedidosSchema = Schema({
     producto:String,
-    cantidad:String,
+    cantidad:Number,
     subTotal:Number,
     alumno:String,
     carnet:String,

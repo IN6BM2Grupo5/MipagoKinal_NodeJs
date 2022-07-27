@@ -10,7 +10,7 @@ function AdminApp() {
         { rol: "Admin_APP", usuario: "MipagoKinalAdmin" },
         (err, usuarioEcontrado) => {
             if (usuarioEcontrado.length == 0) {
-                bcrypt.hash("MipagoKinal", null, null, (err, passwordEncriptada) => {
+                bcrypt.hash("MipagoKinalAdmin", null, null, (err, passwordEncriptada) => {
                     Usuario.create({
                         correo: 'mipagokinaladmin@gmail.com',
                         password: passwordEncriptada,
