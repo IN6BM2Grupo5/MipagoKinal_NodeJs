@@ -155,9 +155,15 @@ function editarProductos(req, res) {
                                 if (parametros.subTipo == 'No') {
                                     parametros.stock == '0'
                                 }
-                                Producto.findByIdAndUpdate(idProducto, parametros,{new:true}, (err, productoActualizado) => {
+                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
+                                    Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
+                                        (err, productoActualizado) => {
+                                            if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+                                            if (!productoActualizado) return res.status(404).send({ mensaje: 'Error al Editar el Producto' })
+                                            return res.status(200).send({ producto: productoActualizado });
+                                        })
                                     return res.status(200).send({ producto: productoActualizado });
                                 })
                             } else {
@@ -175,9 +181,15 @@ function editarProductos(req, res) {
                                 if (parametros.subTipo == 'No') {
                                     parametros.stock == '0'
                                 }
-                                Producto.findByIdAndUpdate(idProducto,parametros,{new:true}, (err, productoActualizado) => {
+                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
+                                    Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
+                                        (err, productoActualizado) => {
+                                            if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+                                            if (!productoActualizado) return res.status(404).send({ mensaje: 'Error al Editar el Producto' })
+                                            return res.status(200).send({ producto: productoActualizado });
+                                        })
                                     return res.status(200).send({ producto: productoActualizado });
                                 })
                             } else {
