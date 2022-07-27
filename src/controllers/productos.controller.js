@@ -153,9 +153,12 @@ function editarProductos(req, res) {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!productoEncontrado || parametros.producto == infoProducto.producto) {
                                 if (parametros.subTipo == 'No') {
-                                    parametros.stock == '0'
+                                    parametros.stock = 0
+                                    parametros.subTipo= "SinStock"
+                                }else if(parametros.subTipo == 'Si'){
+                                    parametros.subTipo=='ConStock'
                                 }
-                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado} ,{new:true}, (err, productoActualizado) => {
+                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado,subTipo:parametros.subTipo} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
                                     Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
@@ -178,10 +181,14 @@ function editarProductos(req, res) {
                         Producto.findOne({ producto: parametros.producto, tipo: 'Secretaria' }, (err, productoEncontrado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!productoEncontrado || parametros.producto == infoProducto.producto) {
+                                
                                 if (parametros.subTipo == 'No') {
-                                    parametros.stock == '0'
+                                    parametros.stock = 0
+                                    parametros.subTipo= "SinStock"
+                                }else if(parametros.subTipo == 'Si'){
+                                    parametros.subTipo=='ConStock'
                                 }
-                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado} ,{new:true}, (err, productoActualizado) => {
+                                Producto.findByIdAndUpdate(idProducto,{producto:parametros.producto,precio:parametros.precio,estado:parametros.estado,subTipo:parametros.subTipo} ,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
                                     Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.stock } }, { new: true },
