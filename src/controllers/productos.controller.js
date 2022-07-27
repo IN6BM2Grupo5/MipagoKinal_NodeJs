@@ -152,10 +152,10 @@ function editarProductos(req, res) {
                         Producto.findOne({ producto: parametros.producto, tipo: 'Cafeteria' }, (err, productoEncontrado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!productoEncontrado || parametros.producto == infoProducto.producto) {
-                                if (parametros.subTipo == 'SinStock') {
+                                if (parametros.subTipo == 'No') {
                                     parametros.stock == '0'
                                 }
-                                Producto.findByIdAndUpdate(idProducto, (err, productoActualizado) => {
+                                Producto.findByIdAndUpdate(idProducto, parametros,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
                                     return res.status(200).send({ producto: productoActualizado });
@@ -172,7 +172,10 @@ function editarProductos(req, res) {
                         Producto.findOne({ producto: parametros.producto, tipo: 'Secretaria' }, (err, productoEncontrado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!productoEncontrado || parametros.producto == infoProducto.producto) {
-                                Producto.findByIdAndUpdate(idProducto, (err, productoActualizado) => {
+                                if (parametros.subTipo == 'No') {
+                                    parametros.stock == '0'
+                                }
+                                Producto.findByIdAndUpdate(idProducto,parametros,{new:true}, (err, productoActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!productoActualizado) return res.status(500).send({ mensaje: 'Error al actualizar los datos' });
                                     return res.status(200).send({ producto: productoActualizado });
