@@ -118,7 +118,7 @@ function AgregarAdmin(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.apellidos && parametros.password && parametros.correo) {
+        if (parametros.nombres && parametros.rol && parametros.password && parametros.correo) {
             if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                 Usuario.findOne({ correo: parametros.correo }, (err, correoNoDisponible) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -128,7 +128,6 @@ function AgregarAdmin(req, res) {
                                 if (err) return res.status(404).send({ mensaej: 'Error en la peticion' });
                                 if (!passwordNoDisponible) {
                                     usuarioModel.nombres = parametros.nombres;
-                                    usuarioModel.apellidos = parametros.apellidos;
                                     usuarioModel.correo = parametros.correo.toLowerCase();
                                     usuarioModel.rol = parametros.rol;
                                     usuarioModel.password = passwordEncriptada;
@@ -365,7 +364,7 @@ function administradoresCafeteria(req, res) {
 
 function administradores(req, res) {
     if (req.user.rol == 'Admin_APP') {
-        Usuario.find({ rol: ('Admin_Cafeteria' || "Admin_Secretaria") }, (err, adminsEncontrados) => {
+        Usuario.find({ rol: ['Admin_Secretaria', 'Admin_Cafeteria'] }, (err, adminsEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!adminsEncontrados) return res.status(500).send({ mensaje: 'No se encontraron alumnos' });
 

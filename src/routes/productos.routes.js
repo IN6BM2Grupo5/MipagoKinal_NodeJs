@@ -6,7 +6,6 @@ var api= express.Router();
 
 //Agregar Productos
 api.post('/productoConStock',md_autenticacion.Auth, productosController.agregarProductosConStock);
-api.post('/productoSinStock',md_autenticacion.Auth, productosController.agregarProductosSinStock);
 //Editar Productos
 api.put('/editarProducto/:idProducto',md_autenticacion.Auth, productosController.editarProductos);
 //Editar Stock
