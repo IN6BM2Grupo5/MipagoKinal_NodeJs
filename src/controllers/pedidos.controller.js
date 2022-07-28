@@ -41,13 +41,17 @@ function pedido(req, res) {
                             var fPedido = new Date(parametros.fechaPedido).getTime();
                             var fechaPedido = new Date(parametros.fechaPedido);
                             var dPedido = fechaPedido.getDay();
+                            var npedido = fechaPedido.getDate()
+                            console.log(parametros.fechaPedido);
+                            console.log(fechaPedido);
+                            console.log(npedido);
+                            console.log(dPedido);
                             if (fPedido >= fhoy) {
-                                if (dPedido == 0 || dPedido == 6) return res.status(500).send({ mensaje: 'No se pueden realizar pedidos para los fines de semana' });
+                                if (dPedido == 5 || dPedido == 6) return res.status(500).send({ mensaje: 'No se pueden realizar pedidos para los fines de semana' });
                                 if (fPedido > fomes) return res.status(500).send({ mensaje: 'No se pueden hacer pedidos para mas de un mes' });
                                 if (infoProducto.subTipo == 'ConStock') {
                                     if (infoProducto.stock >= parametros.cantidad) {
                                         precioProductos = Number(infoProducto.precio) * Number(parametros.cantidad);
-                                        console.log(precioProductos);
                                         if (infoProducto.tipo == 'Cafeteria') {
                                             if (precioProductos <= infoAlumno.cuentaCafeteria) {
                                                 Producto.findByIdAndUpdate(idProducto, { $inc: { stock: parametros.cantidad * -1 } }, { new: true }, (err, stockActualizado) => {
@@ -142,7 +146,6 @@ function pedido(req, res) {
                                     }
                                 } else if (infoProducto.subTipo == 'SinStock') {
                                     precioProductos = Number(infoProducto.precio) * Number(parametros.cantidad);
-                                    console.log(precioProductos)
                                     if (infoProducto.tipo == 'Cafeteria') {
                                         if (precioProductos <= infoAlumno.cuentaCafeteria) {
                                             Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: precioProductos * -1 } }, { new: true }, (err, cuentaActualizada) => {
@@ -311,7 +314,7 @@ function cancelarPedido(req, res) {
             var fped = new Date(infoPedido.fechaPedido).getTime();
             if (req.user.rol == 'Alumno') {
                 if (fhoy >= fped) return res.status(500).send({ mensaje: 'El pedido ya no puede cancelarse, habla con un administrador para solucionar el problema' });
-                if (infoPedido.tipo = 'Cafeteria') {
+                if (infoPedido.tipo == 'Cafeteria') {
                     Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                         if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
@@ -331,7 +334,7 @@ function cancelarPedido(req, res) {
                             });
                         });
                     });
-                } else if (infoPedido.tipo = 'Secretaria') {
+                } else if (infoPedido.tipo == 'Secretaria') {
                     Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                         if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
@@ -405,10 +408,11 @@ function cancelarPedido(req, res) {
                                                 });
                                             });
                                         });
-                                    } else if (infoPedido.tipo = 'Secretaria') {
+                                    } else if (infoPedido.tipo == 'Secretaria') {
                                         Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                             if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                            console.log(cuentaActualizada)
                                             Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                 if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
@@ -430,7 +434,7 @@ function cancelarPedido(req, res) {
                             } else if (strikesActualizados.strikes > 3) {
                                 return res.status(500).send({ mensaje: 'Usted ya ha sido baneado' })
                             } else {
-                                if (infoPedido.tipo = 'Cafeteria') {
+                                if (infoPedido.tipo == 'Cafeteria') {
                                     Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                         if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
@@ -450,10 +454,11 @@ function cancelarPedido(req, res) {
                                             });
                                         });
                                     });
-                                } else if (infoPedido.tipo = 'Secretaria') {
+                                } else if (infoPedido.tipo == 'Secretaria') {
                                     Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                         if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                        console.log(cuentaActualizada)
                                         Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                             if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
@@ -474,7 +479,7 @@ function cancelarPedido(req, res) {
                             }
                         })
                     } else {
-                        if (infoPedido.tipo = 'Cafeteria') {
+                        if (infoPedido.tipo == 'Cafeteria') {
                             Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaCafeteria: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                 if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
@@ -494,10 +499,11 @@ function cancelarPedido(req, res) {
                                     });
                                 });
                             });
-                        } else if (infoPedido.tipo = 'Secretaria') {
+                        } else if (infoPedido.tipo == 'Secretaria') {
                             Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                 if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                console.log(cuentaActualizada)
                                 Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
@@ -547,6 +553,7 @@ function confirmarEntrega(req, res) {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!infoPedido) return res.status(500).send({ mensaje: 'Error al encontrar el pedido' });
             if (infoPedido.producto = 'Marbete') {
+                var unMes;
                 unMes = Number(unMes);
                 unMes += 30 * 24 * 60 * 60 * 1000;
                 unMes = new Date(unMes);
@@ -559,7 +566,7 @@ function confirmarEntrega(req, res) {
                 } else {
                     unMes = unMes.getFullYear() + '-' + (unMes.getMonth() + 1) + '-' + unMes.getDate();
                 }
-                Usuario.findById(idPedido.idUsuario, (err, infoAlumno) => {
+                Usuario.findById(infoPedido.idAlumno, (err, infoAlumno) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                     if (!infoAlumno) return res.status(500).send({ mensaje: 'Error al encontrar el usuario' });
                     Pedidos.findByIdAndDelete(idPedido, (err, pedidoEliminado) => {
@@ -693,7 +700,7 @@ function verPedidosAdminHoy(req, res) {
 function pedidosPorCarnet(req, res) {
     var carnet = req.params.carnet;
     if (req.user.rol == 'Admin_Secretaria') {
-        Pedidos.find({ tipo: 'Secretaria', carnet: carnet }, (err, pedidosEncontrados) => {
+        Pedidos.find({ tipo: 'Secretaria', carnet: { $regex: carnet, $options: 'i' } }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
             return res.status(200).send({ pedidos: pedidosEncontrados });
@@ -712,13 +719,13 @@ function pedidosPorCarnet(req, res) {
 function pedidosPorNombre(req, res) {
     var nombre = req.params.nombre;
     if (req.user.rol == 'Admin_Secretaria') {
-        Pedidos.find({ tipo: 'Secretaria', alumno: nombre }, (err, pedidosEncontrados) => {
+        Pedidos.find({ tipo: 'Secretaria', nombre: { $regex: nombre, $options: 'i' } }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
             return res.status(200).send({ pedidos: pedidosEncontrados });
         });
     } else if (req.user.rol == 'Admin_Cafeteria') {
-        Pedidos.find({ tipo: 'Cafeteria', alumno: nombre }, (err, pedidosEncontrados) => {
+        Pedidos.find({ tipo: 'Cafeteria', nombre: { $regex: nombre, $options: 'i' } }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
             return res.status(200).send({ pedidos: pedidosEncontrados });

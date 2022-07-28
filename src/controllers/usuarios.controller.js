@@ -1,4 +1,5 @@
 const Usuario = require("../models/usuarios.models");
+const Producto = require("../models/productos.models");
 const Pedidos = require('../models/pedidos.models');
 const bcrypt = require("bcrypt-nodejs");
 const jwt = require("../services/jwt");
@@ -118,7 +119,7 @@ function AgregarAdmin(req, res) {
     var usuarioModel = new Usuario();
     var parametros = req.body;
     if (req.user.rol == 'Admin_APP') {
-        if (parametros.nombres && parametros.rol && parametros.password && parametros.correo) {
+        if (parametros.nombres && parametros.rol && parametros.password && parametros.correo && parametros.apellidos) {
             if (parametros.correo.endsWith('@kinal.edu.gt') || parametros.correo.endsWith('@gmail.com') || parametros.correo.endsWith('@kinal.org.gt')) {
                 Usuario.findOne({ correo: parametros.correo }, (err, correoNoDisponible) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -128,6 +129,7 @@ function AgregarAdmin(req, res) {
                                 if (err) return res.status(404).send({ mensaej: 'Error en la peticion' });
                                 if (!passwordNoDisponible) {
                                     usuarioModel.nombres = parametros.nombres;
+                                    usuarioModel.apellidos = parametros.apellidos;
                                     usuarioModel.correo = parametros.correo.toLowerCase();
                                     usuarioModel.rol = parametros.rol;
                                     usuarioModel.password = passwordEncriptada;
