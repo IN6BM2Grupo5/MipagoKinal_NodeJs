@@ -669,7 +669,7 @@ function pedidosPorCarnet(req, res) {
             return res.status(200).send({ pedidos: pedidosEncontrados });
         });
     } else if (req.user.rol == 'Admin_Cafeteria') {
-        Pedidos.find({ tipo: 'Cafeteria', carnet: carnet }, (err, pedidosEncontrados) => {
+        Pedidos.find({ tipo: 'Cafeteria', carnet: { $regex: carnet, $options: 'i' } }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
             return res.status(200).send({ pedidos: pedidosEncontrados });
