@@ -503,7 +503,6 @@ function cancelarPedido(req, res) {
                             Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { cuentaAdmin: infoPedido.subTotal } }, { new: true }, (err, cuentaActualizada) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                 if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                                console.log(cuentaActualizada)
                                 Producto.findByIdAndUpdate(infoPedido.idProducto, { $inc: { stock: cantidad } }, { new: true }, (err, stockActualizado) => {
                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                     if (!stockActualizado) return res.status(500).send({ mensaje: 'Error al actualizar el stock' });
@@ -615,7 +614,7 @@ function verPedidos(req, res) {
             return res.status(200).send({ pedidos: pedidosEncontrados });
         });
     } else if (req.user.rol == 'Alumno') {
-        Pedidos.find({ idUsuario: req.user.sub }, (err, pedidosEncontrados) => {
+        Pedidos.find({ idAlumno: req.user.sub }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
             return res.status(200).send({ pedidos: pedidosEncontrados })
