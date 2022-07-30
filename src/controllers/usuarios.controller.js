@@ -232,7 +232,7 @@ function editarUsuario(req, res) {
 function ingresarVehiculo(req, res) {
     var parametros = req.body;
     if (req.user.rol == "Alumno") {
-        if (parametros.vehiculo && parametros.placas && parametros.modelo) {
+        if (parametros.marbete[0].vehiculo && parametros.marbete[0].placas && parametros.marbete[0].modelo) {
             Usuario.findById(req.user.sub, (err, infoAlumno) => {
                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                 if (!infoAlumno) return res.status(500).send({ mensaje: 'No se encontro la informacion del alumno' });
@@ -240,7 +240,7 @@ function ingresarVehiculo(req, res) {
                     return res.status(500).send({ mensaje: 'usted ya cuenta con un marbete que caduca el ' + infoAlumno.marbete[0].fechaFin })
                 } else if (infoAlumno.marbete[0].vehiculo != '') {
                     Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
-                        { 'marbete.$.vehiculo': parametros.vehiculo, 'marbete.$.placas': parametros.placas, 'marbete.$.modelo': parametros.modelo },
+                        { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
                         { new: true },
                         (err, usuarioEditado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -249,7 +249,7 @@ function ingresarVehiculo(req, res) {
                         })
                 } else {
                     Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
-                        { 'marbete.$.vehiculo': parametros.vehiculo, 'marbete.$.placas': parametros.placas, 'marbete.$.modelo': parametros.modelo },
+                        { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
                         { new: true },
                         (err, usuarioEditado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
