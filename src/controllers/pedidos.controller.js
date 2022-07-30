@@ -255,6 +255,7 @@ function pedirMarbete(req, res) {
                         modeloPedido.alumno = infoAlumno.nombres + ' ' + infoAlumno.apellidos;
                         modeloPedido.carnet = infoAlumno.carnet;
                         modeloPedido.tipo = 'Secretaria';
+                        modeloPedido.idAlumno = req.user.sub;
                         Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: precio * -1 } }, { new: true }, (err, cuentaActualizada) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
