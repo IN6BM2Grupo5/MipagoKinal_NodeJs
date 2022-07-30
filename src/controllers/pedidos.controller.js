@@ -371,7 +371,7 @@ function cancelarPedido(req, res) {
                         Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { strikes: 1 } }, { new: true }, (err, strikesActualizados) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!strikesActualizados) return res.status(500).send({ mensaje: 'Error al actualizar los strikes' });
-                            if (strikesActualizados.strikes = 3) {
+                            if (strikesActualizados.strikes >= 3) {
                                 var unasem = new Date();
                                 unasem = Number(unasem);
                                 unasem += 7 * 24 * 60 * 60 * 1000;
@@ -431,7 +431,7 @@ function cancelarPedido(req, res) {
                                         });
                                     }
                                 })
-                            } else if (strikesActualizados.strikes > 3) {
+                            } else if (strikesActualizados.strikes >= 3) {
                                 return res.status(500).send({ mensaje: 'Usted ya ha sido baneado' })
                             } else {
                                 if (infoPedido.tipo == 'Cafeteria') {
@@ -602,22 +602,6 @@ function confirmarEntrega(req, res) {
 
 //verPedidos
 function verPedidos(req, res) {
-    const date = new Date();
-    var year = date.getFullYear();
-    var month = (date.getMonth() + 1)
-    var month2 = (date.getMonth() + 2)
-    if (month <= 9) {
-        month = '0' + (date.getMonth() + 1)
-    }
-    if (month2 <= 9) {
-        month2 = '0' + (date.getMonth() + 2)
-    }
-    var day = date.getDate();
-    if (day <= 9) {
-        day = '0' + date.getDate();
-    }
-    const tiempoTranscurrido = year + '-' + month + '-' + day;
-    const mesPronto = year + '-' + month2 + '-' + day;
     if (req.user.rol == 'Admin_Secretaria') {
         Pedidos.find({ tipo: 'Secretaria' }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
@@ -631,31 +615,10 @@ function verPedidos(req, res) {
             return res.status(200).send({ pedidos: pedidosEncontrados });
         });
     } else if (req.user.rol == 'Alumno') {
-        Usuario.findById(req.user.sub, (err, infoAlumno) => {
+        Pedidos.find({ idUsuario: req.user.sub }, (err, pedidosEncontrados) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-            if (!infoAlumno) return res.status(500).send({ mensaje: 'Error al encontrar la informacion' });
-            if (infoAlumno.fechaBaneo != '') {
-                var fhoy = new Date(tiempoTranscurrido).getTime();
-                var fBan = new Date(infoAlumno.fechaBaneo).getTime();
-                if (fhoy > fBan) {
-                    Usuario.findByIdAndUpdate(req.user.sub, { fechaBaneo: '', strikes: 0 }, { new: true }, (err, desbaneo) => {
-                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                        if (!desbaneo) return res.status(500).send({ mensaje: 'Error al desbanear' })
-                    })
-                }
-                Pedidos.find({ idUsuario: req.user.sub }, (err, pedidosEncontrados) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
-                    return res.status(200).send({ pedidos: pedidosEncontrados })
-                })
-
-            } else {
-                Pedidos.find({ idUsuario: req.user.sub }, (err, pedidosEncontrados) => {
-                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                    if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
-                    return res.status(200).send({ pedidos: pedidosEncontrados })
-                })
-            }
+            if (!pedidosEncontrados) return res.status(500).send({ mensaje: 'Error en encontrar los pedidos' });
+            return res.status(200).send({ pedidos: pedidosEncontrados })
         })
     } else {
         return res.status(500).send({ mensaje: 'No esta autorizado para ver los pedidos' })

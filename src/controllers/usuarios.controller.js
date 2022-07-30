@@ -377,28 +377,56 @@ function administradores(req, res) {
     }
 }
 
-function verMarbete(req,res){
-    if(req.user.rol == 'Alumno'){
-        Usuario.findById(req.user.sub,(err,infoAlumno)=>{
-            if(err) return res.status(404).send({mensaje:'Error en la peticion'});
-            if(!infoAlumno) return res.status(500).send({mensaje:'Error al cargar los datos del usuario'});
-            if(infoAlumno.marbete[0].fechaInicio!=''){
-                return res.status(200).send({marbete:infoAlumno.marbete[0]})
-            }else{
-                return res.status(500).send({mensaje:'Usted no ha tramitado su marbete'})
+function verMarbete(req, res) {
+    if (req.user.rol == 'Alumno') {
+        Usuario.findById(req.user.sub, (err, infoAlumno) => {
+            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+            if (!infoAlumno) return res.status(500).send({ mensaje: 'Error al cargar los datos del usuario' });
+            if (infoAlumno.marbete[0].fechaInicio != '') {
+                return res.status(200).send({ marbete: infoAlumno.marbete[0] })
+            } else {
+                return res.status(500).send({ mensaje: 'Usted no ha tramitado su marbete' })
             }
         })
-    }else{
-        return res.status(500).send({mensaje:'Solo los alumnos pueden ver su marbete'});
+    } else {
+        return res.status(500).send({ mensaje: 'Solo los alumnos pueden ver su marbete' });
     }
 }
 
 //Busquedas
 function usuarioId(req, res) {
     var idUsuario = req.params.idUsuario;
+    const date = new Date();
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1)
+    var month2 = (date.getMonth() + 2)
+    if (month <= 9) {
+        month = '0' + (date.getMonth() + 1)
+    }
+    if (month2 <= 9) {
+        month2 = '0' + (date.getMonth() + 2)
+    }
+    var day = date.getDate();
+    if (day <= 9) {
+        day = '0' + date.getDate();
+    }
+    const tiempoTranscurrido = year + '-' + month + '-' + day;
+    const mesPronto = year + '-' + month2 + '-' + day;
     Usuario.findById(idUsuario, (err, usuarioEncontrado) => {
         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
         if (!usuarioEncontrado) return res.status(500).send({ mensaje: 'Error al encontrar usuarios' });
+        if (req.user.rol == 'Alumno') {
+            if (usuarioEncontrado.fechaBaneo != '') {
+                var fhoy = new Date(tiempoTranscurrido).getTime();
+                var fBan = new Date(usuarioEncontrado.fechaBaneo).getTime();
+                if (fhoy > fBan) {
+                    Usuario.findByIdAndUpdate(req.user.sub, { fechaBaneo: '', strikes: 0 }, { new: true }, (err, desbaneo) => {
+                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                        if (!desbaneo) return res.status(500).send({ mensaje: 'Error al desbanear' })
+                    })
+                }
+            }
+        }
         return res.status(200).send({ usuario: usuarioEncontrado });
     })
 }
