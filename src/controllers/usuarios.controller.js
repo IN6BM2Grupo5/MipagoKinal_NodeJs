@@ -258,6 +258,8 @@ function ingresarVehiculo(req, res) {
                         })
                 }
             })
+        }else{
+            return res.status(500).send({mensaje:'Rellene todos los campos'})
         }
     } else {
         return res.status(500).send({ mensaje: 'No esta autorizado para ingresar un vehiculo' });
