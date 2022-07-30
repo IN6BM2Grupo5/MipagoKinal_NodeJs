@@ -553,7 +553,7 @@ function confirmarEntrega(req, res) {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!infoPedido) return res.status(500).send({ mensaje: 'Error al encontrar el pedido' });
             if (infoPedido.producto = 'Marbete') {
-                var unMes;
+                var unMes = new Date();;
                 unMes = Number(unMes);
                 unMes += 30 * 24 * 60 * 60 * 1000;
                 unMes = new Date(unMes);
