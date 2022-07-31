@@ -42,10 +42,6 @@ function pedido(req, res) {
                             var fechaPedido = new Date(parametros.fechaPedido);
                             var dPedido = fechaPedido.getDay();
                             var npedido = fechaPedido.getDate()
-                            console.log(parametros.fechaPedido);
-                            console.log(fechaPedido);
-                            console.log(npedido);
-                            console.log(dPedido);
                             if (fPedido >= fhoy) {
                                 if (dPedido == 5 || dPedido == 6) return res.status(500).send({ mensaje: 'No se pueden realizar pedidos para los fines de semana' });
                                 if (fPedido > fomes) return res.status(500).send({ mensaje: 'No se pueden hacer pedidos para mas de un mes' });
@@ -244,29 +240,40 @@ function pedirMarbete(req, res) {
             if (!infoAlumno) return res.status(500).send({ mensaje: 'Error al traer los datos del alumno' });
             if (infoAlumno.strikes < 3) {
                 if (infoAlumno.marbete[0].vehiculo != '') {
-                    if (infoAlumno.marbete[0].vehiculo == "Moto") {
-                        precio = 60;
-                    } else if (infoAlumno.marbete[0].vehiculo == 'Carro') {
-                        precio = 120;
-                    }
-                    if (infoAlumno.cuentaAdmin >= precio) {
-                        modeloPedido.producto = 'Marbete';
-                        modeloPedido.subTotal = precio;
-                        modeloPedido.alumno = infoAlumno.nombres + ' ' + infoAlumno.apellidos;
-                        modeloPedido.carnet = infoAlumno.carnet;
-                        modeloPedido.tipo = 'Secretaria';
-                        modeloPedido.idAlumno = req.user.sub;
-                        Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: precio * -1 } }, { new: true }, (err, cuentaActualizada) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
-                            modeloPedido.save((err, pedidoGuardado) => {
-                                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                                if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
-                                return res.status(200).send({ pedido: pedidoGuardado });
-                            })
+                    if(infoAlumno.marbete[0].fechaInicio == ''){
+                        Pedidos.findOne({idAlumno:req.user.sub, producto:'Marbete'},(err,marbetePedido)=>{
+                            if(err) return res.status(500).send({mensaje:'Error en la peticion'});
+                            if(!marbetePedido){
+                                if (infoAlumno.marbete[0].vehiculo == "Moto") {
+                                    precio = 60;
+                                } else if (infoAlumno.marbete[0].vehiculo == 'Carro') {
+                                    precio = 120;
+                                }
+                                if (infoAlumno.cuentaAdmin >= precio) {
+                                    modeloPedido.producto = 'Marbete';
+                                    modeloPedido.subTotal = precio;
+                                    modeloPedido.alumno = infoAlumno.nombres + ' ' + infoAlumno.apellidos;
+                                    modeloPedido.carnet = infoAlumno.carnet;
+                                    modeloPedido.tipo = 'Secretaria';
+                                    modeloPedido.idAlumno = req.user.sub;
+                                    Usuario.findByIdAndUpdate(req.user.sub, { $inc: { cuentaAdmin: precio * -1 } }, { new: true }, (err, cuentaActualizada) => {
+                                        if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                        if (!cuentaActualizada) return res.status(500).send({ mensaje: 'Error al actualizar la cuenta' });
+                                        modeloPedido.save((err, pedidoGuardado) => {
+                                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                            if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
+                                            return res.status(200).send({ pedido: pedidoGuardado });
+                                        })
+                                    })
+                                } else {
+                                    return res.status(500).send({ mensaje: 'No cuenta con el dinero suficiente para pagar el marbete' })
+                                }
+                            }else{
+                                return res.status(500).send({mensaje:'Usted ya ha solicitado un marbete, presentece a administracion para confirmar su pedido'});
+                            }
                         })
-                    } else {
-                        return res.status(500).send({ mensaje: 'No cuenta con el dinero suficiente para pagar el marbete' })
+                    }else{
+                        return res.status(500).send({mensaje:'Usted ya cuenta con un marbete'})
                     }
                 } else {
                     return res.status(500).send({ mensaje: 'Usted no ha ingresado los datos de su vehiculo' });
@@ -552,8 +559,8 @@ function confirmarEntrega(req, res) {
         Pedidos.findById(idPedido, (err, infoPedido) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (!infoPedido) return res.status(500).send({ mensaje: 'Error al encontrar el pedido' });
-            if (infoPedido.producto = 'Marbete') {
-                var unMes = new Date();;
+            if (infoPedido.producto == 'Marbete') {
+                var unMes = new Date();
                 unMes = Number(unMes);
                 unMes += 30 * 24 * 60 * 60 * 1000;
                 unMes = new Date(unMes);

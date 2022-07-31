@@ -258,8 +258,8 @@ function ingresarVehiculo(req, res) {
                         })
                 }
             })
-        }else{
-            return res.status(500).send({mensaje:'Rellene todos los campos'})
+        } else {
+            return res.status(500).send({ mensaje: 'Rellene todos los campos' })
         }
     } else {
         return res.status(500).send({ mensaje: 'No esta autorizado para ingresar un vehiculo' });
@@ -417,15 +417,27 @@ function usuarioId(req, res) {
     Usuario.findById(idUsuario, (err, usuarioEncontrado) => {
         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
         if (!usuarioEncontrado) return res.status(500).send({ mensaje: 'Error al encontrar usuarios' });
+        var fhoy = new Date(tiempoTranscurrido).getTime();
+        var fBan = new Date(usuarioEncontrado.fechaBaneo).getTime();
+        var fFin = new Date(usuarioEncontrado.marbete[0].fechaFin).getTime();
         if (req.user.rol == 'Alumno') {
             if (usuarioEncontrado.fechaBaneo != '') {
-                var fhoy = new Date(tiempoTranscurrido).getTime();
-                var fBan = new Date(usuarioEncontrado.fechaBaneo).getTime();
                 if (fhoy > fBan) {
                     Usuario.findByIdAndUpdate(req.user.sub, { fechaBaneo: '', strikes: 0 }, { new: true }, (err, desbaneo) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                         if (!desbaneo) return res.status(500).send({ mensaje: 'Error al desbanear' })
                     })
+                }
+            }
+            if (usuarioEncontrado.marbete[0].fechaInicio != '') {
+                if(fhoy>fFin){
+                    Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: usuarioEncontrado.marbete[0]._id } } },
+                        { 'marbete.$.fechaInicio': '', 'marbete.$.fechaFin':''},
+                        { new: true },
+                        (err, usuarioEditado) => {
+                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
+                        })
                 }
             }
         }
