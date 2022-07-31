@@ -430,18 +430,24 @@ function usuarioId(req, res) {
                 }
             }
             if (usuarioEncontrado.marbete[0].fechaInicio != '') {
-                if(fhoy>fFin){
+                if (fhoy > fFin) {
                     Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: usuarioEncontrado.marbete[0]._id } } },
-                        { 'marbete.$.fechaInicio': '', 'marbete.$.fechaFin':''},
+                        { 'marbete.$.fechaInicio': '', 'marbete.$.fechaFin': '' },
                         { new: true },
                         (err, usuarioEditado) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
+                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' })
                         })
                 }
             }
+            Usuario.findById(idUsuario, (err, usuarioEncontrado) => {
+                if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                if (!usuarioEncontrado) return res.status(500).send({ mensaje: 'Error al encontrar el usuario' })
+                return res.status(200).send({ usuario: usuarioEncontrado });
+            })
+        } else {
+            return res.status(200).send({ usuario: usuarioEncontrado });
         }
-        return res.status(200).send({ usuario: usuarioEncontrado });
     })
 }
 
