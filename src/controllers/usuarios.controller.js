@@ -239,14 +239,21 @@ function ingresarVehiculo(req, res) {
                 if (infoAlumno.marbete[0].fechaInicio != '') {
                     return res.status(500).send({ mensaje: 'usted ya cuenta con un marbete que caduca el ' + infoAlumno.marbete[0].fechaFin })
                 }else {
-                    Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
-                        { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
-                        { new: true },
-                        (err, usuarioEditado) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
-                            return res.status(200).send({ vehiculo: usuarioEditado.marbete[0] });
-                        })
+                    Pedidos.findOne({idAlumno:req.user.sub,producto:'Marbete'},(err,marbeteExistente)=>{
+                        if(err) return res.status(404).send({mensaje:"Error en la peticion"});
+                        if(!marbeteExistente){
+                            Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
+                                { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
+                                { new: true },
+                                (err, usuarioEditado) => {
+                                    if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
+                                    if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
+                                    return res.status(200).send({ vehiculo: usuarioEditado.marbete[0] });
+                                })
+                        }else{
+                            return res.status(500).send({mensaje:'Usted ya ha pedido un marbete, cancele el que tiene ahora para poder editar la informacion de su vehiculo'})
+                        }
+                    })
                 }
             })
         } else {
