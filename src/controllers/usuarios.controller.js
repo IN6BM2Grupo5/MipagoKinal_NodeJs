@@ -238,16 +238,7 @@ function ingresarVehiculo(req, res) {
                 if (!infoAlumno) return res.status(500).send({ mensaje: 'No se encontro la informacion del alumno' });
                 if (infoAlumno.marbete[0].fechaInicio != '') {
                     return res.status(500).send({ mensaje: 'usted ya cuenta con un marbete que caduca el ' + infoAlumno.marbete[0].fechaFin })
-                } else if (infoAlumno.marbete[0].vehiculo != '') {
-                    Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
-                        { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
-                        { new: true },
-                        (err, usuarioEditado) => {
-                            if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
-                            if (!usuarioEditado) return res.status(500).send({ mensaje: 'Error al editar su vehiculo' });
-                            return res.status(200).send({ vehiculo: usuarioEditado.marbete[0] });
-                        })
-                } else {
+                }else {
                     Usuario.findOneAndUpdate({ marbete: { $elemMatch: { _id: infoAlumno.marbete[0]._id } } },
                         { 'marbete.$.vehiculo': parametros.marbete[0].vehiculo, 'marbete.$.placas': parametros.marbete[0].placas, 'marbete.$.modelo': parametros.marbete[0].modelo },
                         { new: true },
