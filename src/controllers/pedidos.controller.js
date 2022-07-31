@@ -77,10 +77,10 @@ function pedido(req, res) {
                                                                 modeloPedido.save((err, pedidoGuardado) => {
                                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                                     if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
-                                                                    return res.status(200).send({})
+                                                                    return res.status(200).send({pedido: pedidoGuardado})
                                                                 })
                                                             } else {
-                                                                Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad }, $inc: { subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
+                                                                Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad, subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
                                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                                     if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al actualziar un pedido' });
                                                                     return res.status(200).send({ pedido: pedidoActualizado });
@@ -121,10 +121,10 @@ function pedido(req, res) {
                                                                 modeloPedido.save((err, pedidoGuardado) => {
                                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                                     if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
-                                                                    return res.status(200).send({})
+                                                                    return res.status(200).send({pedido: pedidoGuardado})
                                                                 })
                                                             } else {
-                                                                Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad }, $inc: { subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
+                                                                Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad, subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
                                                                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                                     if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al actualziar un pedido' });
                                                                     return res.status(200).send({ pedido: pedidoActualizado });
@@ -162,10 +162,10 @@ function pedido(req, res) {
                                                         modeloPedido.save((err, pedidoGuardado) => {
                                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                             if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
-                                                            return res.status(200).send({})
+                                                            return res.status(200).send({pedido: pedidoGuardado})
                                                         })
                                                     } else {
-                                                        Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad }, $inc: { subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
+                                                        Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad, subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
                                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                             if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al actualziar un pedido' });
                                                             return res.status(200).send({ pedido: pedidoActualizado });
@@ -196,10 +196,10 @@ function pedido(req, res) {
                                                         modeloPedido.save((err, pedidoGuardado) => {
                                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                             if (!pedidoGuardado) return res.status(500).send({ mensaje: 'Error al guardar el pedido' });
-                                                            return res.status(200).send({})
+                                                            return res.status(200).send({pedido: pedidoGuardado})
                                                         })
                                                     } else {
-                                                        Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad }, $inc: { subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
+                                                        Pedidos.findByIdAndUpdate(pedidoEncontrado._id, { $inc: { cantidad: parametros.cantidad, subTotal: precioProductos } }, { new: true }, (err, pedidoActualizado) => {
                                                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                                             if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al actualziar un pedido' });
                                                             return res.status(200).send({ pedido: pedidoActualizado });
