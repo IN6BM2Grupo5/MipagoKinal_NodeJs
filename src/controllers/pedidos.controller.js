@@ -375,7 +375,7 @@ function cancelarPedido(req, res) {
                         });
                     }
                 } else if (req.user.rol == "Admin_Cafeteria" || req.user.rol == 'Admin_Secretaria') {
-                    if (fhoy >= fped) {
+                    if (fhoy > fped) {
                         Usuario.findByIdAndUpdate(infoPedido.idAlumno, { $inc: { strikes: 1 } }, { new: true }, (err, strikesActualizados) => {
                             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                             if (!strikesActualizados) return res.status(500).send({ mensaje: 'Error al actualizar los strikes' });
