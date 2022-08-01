@@ -384,7 +384,7 @@ function cancelarPedido(req, res) {
                                 unasem = Number(unasem);
                                 unasem += 7 * 24 * 60 * 60 * 1000;
                                 unasem = new Date(unasem);
-                                if ((ununasemMes.getMonth() + 1) <= 9 && unasem.getDate() > 9) {
+                                if ((unasem.getMonth() + 1) <= 9 && unasem.getDate() > 9) {
                                     unasem = unasem.getFullYear() + '-' + '0' + (unasem.getMonth() + 1) + '-' + unasem.getDate();
                                 } else if ((unasem.getMonth() + 1) <= 9 && unasem.getDate() <= 9) {
                                     unasem = unasem.getFullYear() + '-' + '0' + (unasem.getMonth() + 1) + '-' + '0' + unasem.getDate();

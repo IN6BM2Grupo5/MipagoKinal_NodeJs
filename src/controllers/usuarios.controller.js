@@ -168,10 +168,10 @@ function editarUsuario(req, res) {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (infoUsuario) {
                 if (infoUsuario.rol == 'Alumno') {
-                    Pedidos.findOne({ idUsuario: idUsuario }, (err, pedidoEncontrado) => {
+                    Pedidos.findOne({ idAlumno: idUsuario }, (err, pedidoEncontrado) => {
                         if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                         if (pedidoEncontrado) {
-                            Pedidos.updateMany({ idUsuario: idUsuario }, { alumno: parametros.nombres + ' ' + parametros.apellidos, carnet: parametros.carnet }, (err, pedidoActualizado) => {
+                            Pedidos.updateMany({ idAlumno: idUsuario }, { alumno: parametros.nombres + ' ' + parametros.apellidos, carnet: parametros.carnet }, (err, pedidoActualizado) => {
                                 if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                                 if (!pedidoActualizado) return res.status(500).send({ mensaje: 'Error al editar los pedidos' });
                             })
@@ -299,7 +299,7 @@ function ingresarFondos(req, res) {
 function eliminarUsuario(req, res) {
     var idUsuario = req.params.idUsuario;
     if (req.user.rol == 'Admin_APP') {
-        Pedidos.find({ idUsuario: idUsuario }, (err, pedidoEncontrado) => {
+        Pedidos.find({ idAlumno: idUsuario }, (err, pedidoEncontrado) => {
             if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
             if (pedidoEncontrado != 0) {
                 for (let i = 0; i < pedidoEncontrado.length; i++) {
@@ -308,7 +308,7 @@ function eliminarUsuario(req, res) {
                         if (!productosActualizados) return res.status(500).send({ mensaje: 'Error al actualizar el producto' });
                     })
                 }
-                Pedidos.deleteMany({ idUsuario: idUsuario }, (err, pedidosEliminados) => {
+                Pedidos.deleteMany({ idAlumno: idUsuario }, (err, pedidosEliminados) => {
                     if (err) return res.status(404).send({ mensaje: 'Error en la peticion' });
                     if (!pedidosEliminados) return res.status(500).send({ mensaje: 'Error al eliminar los productos' });
                 })
